@@ -67,7 +67,7 @@ object Form1: TForm1
       'you can revoke (Unregister) a certificate loaded in this memo.'
       ''
       
-        'feedbacks are welcome (in english of french) at contact@execute.' +
+        'feedbacks are welcome (in english or french) at contact@execute.' +
         'fr')
     ScrollBars = ssBoth
     TabOrder = 0
