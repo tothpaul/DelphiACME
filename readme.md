@@ -51,7 +51,7 @@ Domain.key is the private key for the domain (same recommandations).
 
 this repository contains the full source code of the demo application for the CLOSED SOURCE component TLetsEncrypt.
 
-you'll find the compiled Execute.LetsEncrypt.dcu unit in the [lib](/lib) folder and the Interface part of the Unit in [Execute.LetsEncrypts.Interface.pas](lib/Execute.LetsEncrypts.Interface.pas).
+you'll find the compiled Execute.LetsEncrypt.dcu unit in the [lib](/lib) folder and the Interface part of the Unit in [Execute.LetsEncrypt.Interface.pas](lib/Execute.LetsEncrypt.Interface.pas).
 
 ![screen](LetsEncrypt-Component.png)
 
