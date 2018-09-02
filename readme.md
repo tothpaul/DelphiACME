@@ -57,12 +57,12 @@ you'll find the compiled Execute.LetsEncrypt.dcu unit in the [lib](/lib) folder 
 
 This component is NOT FREE !
 
-You have to register a licence to use it in any commercial product
+You have to [register a licence](https://store.execute.fr) to use it in any commercial product
 
 you are NOT allowed to use this component to register a commercial website
 certificate without a registered licence.
 
-You can buy the component source code for 50&euro; per developper up to 200&euro; (site licence).
+You can [buy the component source code](https://store.execute.fr) for 50&euro; per developper up to 200&euro; (site licence).
 
 Minor version updates indefinitely and major version updates for 1 year from date of purchase.
 
