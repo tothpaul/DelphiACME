@@ -3,7 +3,7 @@
 
 ## Purpose
 
-TLetsEncrypt component let you request a "[Let's Encrypt](https://letsencrypt.org/)" certificate for you domain.
+TLetsEncrypt component let you request a "[Let's Encrypt](https://letsencrypt.org/)" certificate for your domain.
 
 The component supports HTTP Challenge, you can use a self hosted WebServer (TidHTTPServer) to validate the certificate or use the OnHttpChallenge event to store the challenge reply on your website.
 
