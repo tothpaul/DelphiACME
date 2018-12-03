@@ -1,8 +1,8 @@
-program LetsEncryptDemo;
+program ACMEDemo;
 
 uses
   Vcl.Forms,
-  LetsEncryptDemo.Main in 'LetsEncryptDemo.Main.pas' {Form1};
+  ACMEDemo.Main in 'ACMEDemo.Main.pas' {Form1};
 
 {$R *.res}
 

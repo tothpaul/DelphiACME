@@ -1,4 +1,5 @@
-unit Execute.LetsEncrypt;
+unit Execute.ACME;
+
 {
 
   ACME Delphi client for Let's Encrypt (c)2018 Execute SARL <contact@execute.fr>
@@ -18,7 +19,7 @@ unit Execute.LetsEncrypt;
   Purpose of use: add a Let's Encrypt certificat to a standalone Delphi WebBroker application
 
 
-  Put a TLetsEncryt component on a form
+  Put a TExecuteACME component on a form
 
   Set or generate the AccountKey and DomainKey RSA Private Keys
 
@@ -27,7 +28,7 @@ unit Execute.LetsEncrypt;
   Define OnHttpChallenge
   Define OnCertificate
 
-  call TLetsEncrypt.RegisterDomain();
+  call TExecuteACME.RegisterDomain();
 
   -> OnHttpChallenge (this is NOT an HTTPS request)
     on this request :
@@ -93,7 +94,7 @@ type
   TDomainRegistrationThread = class(TThread)
   end;
 
-  TLetsEncrypt = class(TComponent)
+  TExecuteACME = class(TComponent)
   private
     FEnvironment    : TEnvironment;
     FDirectory      : string;
@@ -142,7 +143,7 @@ type
 
 implementation
 
-{$WARNING ! SOURCE CODE NOT AVAILABLE ! }
+{$WARNING ! Source code available on https://store.execute.fr ! }
 
 initialization
 {$IFDEF LOG}AllocConsole;{$ENDIF}

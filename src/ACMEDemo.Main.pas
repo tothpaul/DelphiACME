@@ -1,7 +1,7 @@
-unit LetsEncryptDemo.Main;
+unit ACMEDemo.Main;
 
 {
-   Sample demonstration of Execute's TLetsEncrypt component for Delphi
+   Sample demonstration of Execute's TExecuteACME component for Delphi
    (c)2018 Execute SARL
 
    <contact@execute.fr>
@@ -23,12 +23,12 @@ uses
 // init this to be sure that OpenSSL is available (but it's not required)
   idSSLOpenSSLHeaders,
 
-// Let's Encrypt component (dependencies: Indy, Execute.JSON, Execute.RTTI)
-  Execute.LetsEncrypt;
+// ACME component (dependencies: Indy, Execute.JSON, Execute.RTTI)
+  Execute.ACME;
 
 type
   TForm1 = class(TForm)
-    LetsEncrypt1: TLetsEncrypt;
+    ExecuteACME1: TExecuteACME;
     IdHTTPServer1: TIdHTTPServer;
     Memo1: TMemo;
     btRegister: TButton;
@@ -40,19 +40,19 @@ type
     cbMode: TComboBox;
     btUnregister: TButton;
     btLoad: TButton;
-    function LetsEncrypt1Password(Sender: TObject; KeyType: TKeyType;
+    function ExecuteACME1Password(Sender: TObject; KeyType: TKeyType;
       var Password: string): Boolean;
-    procedure LetsEncrypt1HttpChallenge(Sender: TObject; const Domain, Token,
+    procedure ExecuteACME1HttpChallenge(Sender: TObject; const Domain, Token,
       Thumbprint: string);
-    procedure LetsEncrypt1Certificate(Sender: TObject; Certificate: TStrings);
+    procedure ExecuteACME1Certificate(Sender: TObject; Certificate: TStrings);
     procedure IdHTTPServer1CommandGet(AContext: TIdContext;
       ARequestInfo: TIdHTTPRequestInfo; AResponseInfo: TIdHTTPResponseInfo);
     procedure FormCreate(Sender: TObject);
-    procedure LetsEncrypt1Error(Sender: TObject; const Error: string);
+    procedure ExecuteACME1Error(Sender: TObject; const Error: string);
     procedure btRegisterClick(Sender: TObject);
     procedure btSaveClick(Sender: TObject);
     procedure btLoadClick(Sender: TObject);
-    procedure LetsEncrypt1Done(Sender: TObject);
+    procedure ExecuteACME1Done(Sender: TObject);
   private
     { Déclarations privées }
     FDomain    : string;
@@ -79,8 +79,8 @@ begin
   if not idSSLOpenSSLHeaders.Load then
     raise Exception.Create('Can not initialize OpenSSL !');
 
-  LoadOrCreateKey(LetsEncrypt1.AccountKey, 'account.key');
-  LoadOrCreateKey(LetsEncrypt1.DomainKey, 'domain.key');
+  LoadOrCreateKey(ExecuteACME1.AccountKey, 'account.key');
+  LoadOrCreateKey(ExecuteACME1.DomainKey, 'domain.key');
 end;
 
 // utility function
@@ -101,7 +101,7 @@ begin
     Str := '';
     if not InputQuery('Protect your key with a password', 'Password for ' + Name,  Str) then
       Exit;
-    TLetsEncrypt.GeneraRSAKey(Key, Str);
+    TExecuteACME.GeneraRSAKey(Key, Str);
     Key.SaveToFile(Name);
   end;
 end;
@@ -110,26 +110,26 @@ end;
 procedure TForm1.btRegisterClick(Sender: TObject);
 begin
   if cbMode.ItemIndex = 0 then
-    LetsEncrypt1.Environment := TEnvironment.StagingV2
+    ExecuteACME1.Environment := TEnvironment.StagingV2
   else
-    LetsEncrypt1.Environment := TEnvironment.ProductionV2;
+    ExecuteACME1.Environment := TEnvironment.ProductionV2;
 
-  LetsEncrypt1.DomainName := edDomain.Text;
-  LetsEncrypt1.ContactEmail := edContact.Text;
+  ExecuteACME1.DomainName := edDomain.Text;
+  ExecuteACME1.ContactEmail := edContact.Text;
 
   if Sender = btRegister then
   begin
   // need to handle HTTP Challenge
     idHTTPServer1.Active := True;
   // start registration process
-    LetsEncrypt1.RegisterDomain;
+    ExecuteACME1.RegisterDomain;
   end else begin
-    LetsEncrypt1.UnregisterDomain(Memo1.Lines.Text, TACMERevokeReason.unspecified);
+    ExecuteACME1.UnregisterDomain(Memo1.Lines.Text, TACMERevokeReason.unspecified);
   end;
 end;
 
-// is you have defined a password, LetsEncrypt ask you for the password of the Keyfile
-function TForm1.LetsEncrypt1Password(Sender: TObject; KeyType: TKeyType;
+// is you have defined a password, ExecuteACME ask you for the password of the Keyfile
+function TForm1.ExecuteACME1Password(Sender: TObject; KeyType: TKeyType;
   var Password: string): Boolean;
 var
   Name: string;
@@ -148,7 +148,7 @@ end;
 //   http://<DomainName>/.well-known/acme-challenge/<Token>
 // need to returns
 //   <Token>.<Thumbprint>
-procedure TForm1.LetsEncrypt1HttpChallenge(Sender: TObject; const Domain, Token,
+procedure TForm1.ExecuteACME1HttpChallenge(Sender: TObject; const Domain, Token,
   Thumbprint: string);
 begin
   FDomain := Domain;
@@ -160,7 +160,7 @@ end;
 procedure TForm1.IdHTTPServer1CommandGet(AContext: TIdContext;
   ARequestInfo: TIdHTTPRequestInfo; AResponseInfo: TIdHTTPResponseInfo);
 begin
-  if ARequestInfo.URI = TLetsEncrypt.WELL_KNOWN_URL + FToken then
+  if ARequestInfo.URI = TExecuteACME.WELL_KNOWN_URL + FToken then
   begin
     AResponseInfo.ContentText := FToken + '.' + FThumbprint;
     PostMessage(Handle, WM_USER, 0, 0);
@@ -174,7 +174,7 @@ begin
 end;
 
 // the certificate is validated, you can save it
-procedure TForm1.LetsEncrypt1Certificate(Sender: TObject;
+procedure TForm1.ExecuteACME1Certificate(Sender: TObject;
   Certificate: TStrings);
 begin
   Memo1.Lines.Assign(Certificate);
@@ -219,12 +219,12 @@ begin
    Memo1.Lines.SaveToFile(Str);
 end;
 
-procedure TForm1.LetsEncrypt1Error(Sender: TObject; const Error: string);
+procedure TForm1.ExecuteACME1Error(Sender: TObject; const Error: string);
 begin
   ShowMessage(Error);
 end;
 
-procedure TForm1.LetsEncrypt1Done(Sender: TObject);
+procedure TForm1.ExecuteACME1Done(Sender: TObject);
 begin
 // the first request will probably not deliver a certificat
 // you have to request it once again after the HttpChallenge is done

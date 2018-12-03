@@ -1,0 +1,60 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ProjectGuid>{7F69B415-1181-4363-A292-AB127AAC3B86}</ProjectGuid>
+    </PropertyGroup>
+    <ItemGroup>
+        <Projects Include="lib\Execute.ACMERuntime.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="lib\Execute.ACMEDesign.dproj">
+            <Dependencies>lib\Execute.ACMERuntime.dproj</Dependencies>
+        </Projects>
+        <Projects Include="src\ACMEDemo.dproj">
+            <Dependencies>lib\Execute.ACMERuntime.dproj</Dependencies>
+        </Projects>
+    </ItemGroup>
+    <ProjectExtensions>
+        <Borland.Personality>Default.Personality.12</Borland.Personality>
+        <Borland.ProjectType/>
+        <BorlandProject>
+            <Default.Personality/>
+        </BorlandProject>
+    </ProjectExtensions>
+    <Target Name="Execute_ACMERuntime">
+        <MSBuild Projects="lib\Execute.ACMERuntime.dproj"/>
+    </Target>
+    <Target Name="Execute_ACMERuntime:Clean">
+        <MSBuild Projects="lib\Execute.ACMERuntime.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="Execute_ACMERuntime:Make">
+        <MSBuild Projects="lib\Execute.ACMERuntime.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Execute_ACMEDesign" DependsOnTargets="Execute.ACMERuntime">
+        <MSBuild Projects="lib\Execute.ACMEDesign.dproj"/>
+    </Target>
+    <Target Name="Execute_ACMEDesign:Clean" DependsOnTargets="Execute.ACMERuntime:Clean">
+        <MSBuild Projects="lib\Execute.ACMEDesign.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="Execute_ACMEDesign:Make" DependsOnTargets="Execute.ACMERuntime:Make">
+        <MSBuild Projects="lib\Execute.ACMEDesign.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="ACMEDemo" DependsOnTargets="Execute.ACMERuntime">
+        <MSBuild Projects="src\ACMEDemo.dproj"/>
+    </Target>
+    <Target Name="ACMEDemo:Clean" DependsOnTargets="Execute.ACMERuntime:Clean">
+        <MSBuild Projects="src\ACMEDemo.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="ACMEDemo:Make" DependsOnTargets="Execute.ACMERuntime:Make">
+        <MSBuild Projects="src\ACMEDemo.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Build">
+        <CallTarget Targets="Execute_ACMERuntime;Execute_ACMEDesign;ACMEDemo"/>
+    </Target>
+    <Target Name="Clean">
+        <CallTarget Targets="Execute_ACMERuntime:Clean;Execute_ACMEDesign:Clean;ACMEDemo:Clean"/>
+    </Target>
+    <Target Name="Make">
+        <CallTarget Targets="Execute_ACMERuntime:Make;Execute_ACMEDesign:Make;ACMEDemo:Make"/>
+    </Target>
+    <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+</Project>

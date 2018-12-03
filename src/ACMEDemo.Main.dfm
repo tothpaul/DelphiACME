@@ -1,7 +1,7 @@
 object Form1: TForm1
   Left = 0
   Top = 0
-  Caption = 'Let'#39's Encrypt (c)2018 Execute SARL'
+  Caption = 'TExecuteACME Demo (c)2018 Execute SARL'
   ClientHeight = 482
   ClientWidth = 556
   Color = clBtnFace
@@ -154,12 +154,12 @@ object Form1: TForm1
     TabOrder = 7
     OnClick = btLoadClick
   end
-  object LetsEncrypt1: TLetsEncrypt
-    OnPassword = LetsEncrypt1Password
-    OnHttpChallenge = LetsEncrypt1HttpChallenge
-    OnCertificate = LetsEncrypt1Certificate
-    OnError = LetsEncrypt1Error
-    OnDone = LetsEncrypt1Done
+  object ExecuteACME1: TExecuteACME
+    OnPassword = ExecuteACME1Password
+    OnHttpChallenge = ExecuteACME1HttpChallenge
+    OnCertificate = ExecuteACME1Certificate
+    OnError = ExecuteACME1Error
+    OnDone = ExecuteACME1Done
     Left = 424
     Top = 96
   end

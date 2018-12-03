@@ -1,4 +1,4 @@
-package Execute.LetsEncryptDesign;
+package Execute.ACMERuntime;
 
 {$R *.res}
 {$IFDEF IMPLICITBUILDING This IFDEF should not be used by users}
@@ -25,17 +25,16 @@ package Execute.LetsEncryptDesign;
 {$IMAGEBASE $400000}
 {$DEFINE DEBUG}
 {$ENDIF IMPLICITBUILDING}
+{$DESCRIPTION 'ExecuteACME runtime package (ACME protocol for Let''s Encrypt)'}
 {$IMPLICITBUILD ON}
 
 requires
   rtl,
-  designide,
   IndySystem,
   IndyProtocols,
-  IndyCore,
-  Execute.LetsEncryptRuntime;
+  IndyCore;
 
 contains
-  Execute.LetsEncrypt.Design in 'Execute.LetsEncrypt.Design.pas';
+  Execute.ACME in 'Execute.ACME.pas';
 
 end.

@@ -1,9 +1,9 @@
-# Let's Encrypt component for Delphi Tokyo
+# ACME (Let's Encrypt protocol) component for Delphi Tokyo
 (c)2018 by [Execute SARL](http://www.execute.fr)
 
 ## Purpose
 
-TLetsEncrypt component let you request a "[Let's Encrypt](https://letsencrypt.org/)" certificate for you domain.
+TExecuteACME component let you request a "[Let's Encrypt](https://letsencrypt.org/)" certificate for you domain.
 
 The component supports HTTP Challenge, you can use a self hosted WebServer (TidHTTPServer) to validate the certificate or use the OnHttpChallenge event to store the challenge reply on your website.
 
@@ -14,9 +14,9 @@ In both case you need to manage the domain's HTTP (not HTTPS) server.
 this component is compatible with Delphi Tokyo 10.2.3 (even the Community Edition).
 
 1. Download the repository
-2. Open LetsEncryptGroup.groupproj
-3. Right click on the project "Execute.LetsEncryptDesign.bpl" and install it
-4. Select the LetsEncryptDemo project
+2. Open ACMEGroup.groupproj
+3. Right click on the project "Execute.ACMEDesign.bpl" and install it
+4. Select the ACMEDemo project
 5. Compile and run the Application
 
 the application requires OpenSSL (libeay32.dll and ssleay32.dll)
@@ -29,7 +29,7 @@ Domain.key is the private key for the domain (same recommandations).
 ## How does it work ?
 
 ### 1. Registration request
-	TLetsEncrypt.RegisterDomain();
+	TExecuteACME.RegisterDomain();
 	 -> Account.key     -> register a Let's Encrypt account.
 	 -> Domain.key      -> send a Certification Signing Request.
 	 -> OnHttpChallenge -> store the challenge Token & Thumbprint.
@@ -39,21 +39,21 @@ Domain.key is the private key for the domain (same recommandations).
 ### 3. Retrieve the certificate
 (you have to do this periodically  because the certificate lives only for 90 days !)
 
-	TLetsEncrypt.RegisterDomain();
+	TExecuteACME.RegisterDomain();
 	 -> Account.key     -> Retrieve account status.
 	 -> Domain.key      -> Retrieve the Certificate from Let's Encrypt.
 	 -> OnCertificate   -> store the updated certificate.
 ### 4. Revoke certificate (if required)
-	 TLetsEncrypt.UnRegisterDomain();
+	 TExecuteACME.UnRegisterDomain();
 	 -> Domain.key      -> Revoke Certificat
 	 -> OnDone          -> the certificate is revoked.
 ## Licence
 
 this repository contains the full source code of the demo application for the CLOSED SOURCE component TLetsEncrypt.
 
-you'll find the compiled Execute.LetsEncrypt.dcu unit in the [lib](/lib) folder and the Interface part of the Unit in [Execute.LetsEncrypt.Interface.pas](lib/Execute.LetsEncrypt.Interface.pas).
+you'll find the compiled Execute.ACME.dcu unit in the [lib](/lib) folder and the Interface part of the Unit in [Execute.ACME.Interface.pas](lib/Execute.ACME.Interface.pas).
 
-![screen](LetsEncrypt-Component.png)
+![screen](ACME-Component.png)
 
 This component is NOT FREE !
 

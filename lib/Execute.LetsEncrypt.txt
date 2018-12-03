@@ -1,0 +1,5 @@
+Let's Encrypt is a trademark  
+
+https://letsencrypt.org/trademarks/
+
+the first release of TExecuteACME was made under the name TLetsEncrypt, the component is exactly the same, only the name has changed.

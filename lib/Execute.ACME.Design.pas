@@ -1,4 +1,4 @@
-unit Execute.LetsEncrypt.Design;
+unit Execute.ACME.Design;
 {
  (c)2018 Execute SARL <contact@execute.fr>
 }
@@ -10,10 +10,10 @@ uses
   System.SysUtils,
   System.Classes,
   Vcl.Dialogs,
-  Execute.LetsEncrypt;
+  Execute.ACME;
 
 type
-  TLetsEncryptEditor = class(TComponentEditor)
+  TExecuteACMEEditor = class(TComponentEditor)
   private
     procedure GenerateKey(Key: TStrings; const Name: string);
   public
@@ -28,14 +28,14 @@ implementation
 
 procedure Register;
 begin
-  RegisterComponents('Execute', [TLetsEncrypt]);
+  RegisterComponents('Execute', [TExecuteACME]);
 
-  RegisterComponentEditor(TLetsEncrypt, TLetsEncryptEditor);
+  RegisterComponentEditor(TExecuteACME, TExecuteACMEEditor);
 end;
 
-{ TLetsEncryptEditor }
+{ TExecuteACMEEditor }
 
-procedure TLetsEncryptEditor.GenerateKey(Key: TStrings; const Name: string);
+procedure TExecuteACMEEditor.GenerateKey(Key: TStrings; const Name: string);
 var
   Str: string;
 begin
@@ -43,7 +43,7 @@ begin
   if not InputQuery('Password for the ' + Name, 'Define the Private Key Password', Str) then
     Exit;
   try
-    TLetsEncrypt.GeneraRSAKey(Key, Str);
+    TExecuteACME.GeneraRSAKey(Key, Str);
     Str := Name + '.key';
     if PromptForFileName(
       Str,
@@ -61,18 +61,18 @@ begin
   end;
 end;
 
-procedure TLetsEncryptEditor.ExecuteVerb(Index: Integer);
+procedure TExecuteACMEEditor.ExecuteVerb(Index: Integer);
 var
-  LE: TLetsEncrypt;
+  LE: TExecuteACME;
 begin
-  LE := GetComponent as TLetsEncrypt;
+  LE := GetComponent as TExecuteACME;
   case Index of
     0: GenerateKey(LE.AccountKey, 'Account');
     1: GenerateKey(LE.DomainKey, 'Domain');
   end;
 end;
 
-function TLetsEncryptEditor.GetVerb(Index: Integer): string;
+function TExecuteACMEEditor.GetVerb(Index: Integer): string;
 begin
   case Index of
     0: Result := 'Generate an Account Private Key';
@@ -80,7 +80,7 @@ begin
   end;
 end;
 
-function TLetsEncryptEditor.GetVerbCount: Integer;
+function TExecuteACMEEditor.GetVerbCount: Integer;
 begin
   Result := 2;
 end;
