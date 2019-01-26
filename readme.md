@@ -1,4 +1,4 @@
-# ACME (Let's Encrypt protocol) component for Delphi Tokyo
+# ACME (Let's Encrypt protocol) component for Delphi Tokyo and Rio
 (c)2018 by [Execute SARL](http://www.execute.fr)
 
 ## Purpose
@@ -11,7 +11,7 @@ In both case you need to manage the domain's HTTP (not HTTPS) server.
 
 ## Installation
 
-this component is compatible with Delphi Tokyo 10.2.3 (even the Community Edition).
+this component is compatible with Delphi Tokyo 10.2.3 (even the Community Edition) and Rio.
 
 1. Download the repository
 2. Open ACMEGroup.groupproj
@@ -49,9 +49,9 @@ Domain.key is the private key for the domain (same recommandations).
 	 -> OnDone          -> the certificate is revoked.
 ## Licence
 
-this repository contains the full source code of the demo application for the CLOSED SOURCE component TLetsEncrypt.
+this repository contains the full source code of the demo application for the CLOSED SOURCE component TExecuteACME.
 
-you'll find the compiled Execute.ACME.dcu unit in the [lib](/lib) folder and the Interface part of the Unit in [Execute.ACME.Interface.pas](lib/Execute.ACME.Interface.pas).
+you'll find the compiled Execute.ACME.dcu unit (only for Tokyo 10.2.3) in the [lib](/lib) folder and the Interface part of the Unit in [Execute.ACME.Interface.pas](lib/Execute.ACME.Interface.pas).
 
 ![screen](ACME-Component.png)
 
