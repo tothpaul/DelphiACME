@@ -1,9 +1,9 @@
 object Form1: TForm1
   Left = 0
   Top = 0
-  Caption = 'TExecuteACME Demo (c)2018 Execute SARL'
-  ClientHeight = 482
-  ClientWidth = 556
+  Caption = 'TExecuteACME Demo (c)2018-2019 Execute SARL'
+  ClientHeight = 672
+  ClientWidth = 588
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -13,29 +13,36 @@ object Form1: TForm1
   OldCreateOrder = False
   OnCreate = FormCreate
   DesignSize = (
-    556
-    482)
+    588
+    672)
   PixelsPerInch = 96
   TextHeight = 13
-  object Label1: TLabel
-    Left = 8
-    Top = 22
-    Width = 64
-    Height = 13
-    Caption = 'Domain name'
-  end
   object Label2: TLabel
-    Left = 8
-    Top = 49
+    Left = 10
+    Top = 38
     Width = 38
     Height = 13
     Caption = 'Contact'
   end
+  object Label3: TLabel
+    Left = 10
+    Top = 69
+    Width = 47
+    Height = 13
+    Caption = 'Alt names'
+  end
+  object Label1: TLabel
+    Left = 10
+    Top = 11
+    Width = 70
+    Height = 13
+    Caption = 'Domaine name'
+  end
   object Memo1: TMemo
     Left = 8
-    Top = 80
-    Width = 540
-    Height = 394
+    Top = 127
+    Width = 572
+    Height = 415
     Anchors = [akLeft, akTop, akRight, akBottom]
     Lines.Strings = (
       'This application let you create a Certificat for an HTTPS server'
@@ -43,15 +50,19 @@ object Form1: TForm1
       '1) PrivateKeys'
       '  you need an Account (account.key) and Domain key (domain.key)'
       '  you can generate them with "openssl genrsa 4096 > filename"'
-      '  or let the application create them with OpenSSL API '
+      '  or let the application create them with OpenSSL API'
       ''
-      '2) Domain Name'
+      '2) Domain Names'
       
-        ' the purpose of Let'#39's Encrypt is to create a certificate for a d' +
-        'omain name'
+        '  the purpose of Let'#39's Encrypt is to create a certificate for a ' +
+        'domain name'
       '  this application have to be reachabled at this URL:'
       '  http://<DomainName>/'
       '  this is required for the "HTTP Challenge" of Let'#39's Encrypt'
+      '  You can use multiple sub-domains in one request like:'
+      '   www.mydomain.com'
+      '   ftp.mydomain.com'
+      '   smtp.mydomain.com'
       ''
       '3) Contact'
       '  the contact email is optional'
@@ -60,9 +71,10 @@ object Form1: TForm1
       '  for testing, use Staging, for production use Production'
       ''
       'to create a certificate, click on the Register button'
-      'the first request will probably not give you the certificate'
-      'the HTTP Challenge need to be performed first'
-      'the second request will give you the certificate'
+      
+        'once the HTTP Challenge is peformed, you can Finalize the reques' +
+        't'
+      'to get the Certificat.'
       ''
       'you can revoke (Unregister) a certificate loaded in this memo.'
       ''
@@ -70,71 +82,59 @@ object Form1: TForm1
         'feedbacks are welcome (in english or french) at contact@execute.' +
         'fr')
     ScrollBars = ssBoth
-    TabOrder = 0
+    TabOrder = 9
   end
   object btRegister: TButton
-    Left = 473
-    Top = 18
+    Left = 505
+    Top = 8
     Width = 75
     Height = 25
     Hint = 'Request a certificate for the specified domain'
     Anchors = [akTop, akRight]
     Caption = 'Register'
-    TabOrder = 1
+    TabOrder = 4
     OnClick = btRegisterClick
   end
-  object edDomain: TEdit
-    Left = 88
-    Top = 19
-    Width = 217
-    Height = 21
-    Hint = 
-      'The domain where this application is reachable and for wich you ' +
-      'want et Let'#39's Encrypt certificate'
-    Anchors = [akLeft, akTop, akRight]
-    TabOrder = 2
-    TextHint = 'www.example.com'
-  end
   object edContact: TEdit
-    Left = 88
-    Top = 46
-    Width = 217
+    Left = 87
+    Top = 36
+    Width = 249
     Height = 21
     Hint = 'An optional contact email'
     Anchors = [akLeft, akTop, akRight]
-    TabOrder = 3
+    TabOrder = 1
     TextHint = 'contact@example.com'
   end
   object btSave: TButton
-    Left = 392
-    Top = 49
+    Left = 424
+    Top = 37
     Width = 75
     Height = 25
     Hint = 'Save the certificate (the content of the memo)'
     Anchors = [akTop, akRight]
     Caption = 'Save...'
     Enabled = False
-    TabOrder = 4
+    TabOrder = 8
     OnClick = btSaveClick
   end
   object cbMode: TComboBox
-    Left = 313
-    Top = 19
+    Left = 345
+    Top = 9
     Width = 154
     Height = 22
     Hint = 'Use staging for your test !'
     Style = csOwnerDrawFixed
     Anchors = [akTop, akRight]
     ItemIndex = 0
-    TabOrder = 5
+    TabOrder = 3
     Text = 'Staging'
     Items.Strings = (
       'Staging'
       'Production')
   end
   object btUnregister: TButton
-    Left = 473
-    Top = 49
+    Left = 505
+    Top = 65
     Width = 75
     Height = 25
     Hint = 'Revoke the certificate displayed in the memo'
@@ -144,8 +144,8 @@ object Form1: TForm1
     OnClick = btRegisterClick
   end
   object btLoad: TButton
-    Left = 311
-    Top = 49
+    Left = 344
+    Top = 37
     Width = 75
     Height = 25
     Hint = 'Load an existing certificate, so you can revoke it'
@@ -154,19 +154,71 @@ object Form1: TForm1
     TabOrder = 7
     OnClick = btLoadClick
   end
+  object mmSubjectAltNames: TMemo
+    Left = 87
+    Top = 68
+    Width = 251
+    Height = 53
+    Hint = 'Subject Alternative names (SAN) like ftp.exemple.com'
+    TabOrder = 2
+  end
+  object mmHTTP: TMemo
+    Left = 8
+    Top = 548
+    Width = 572
+    Height = 116
+    Anchors = [akLeft, akRight, akBottom]
+    Lines.Strings = (
+      'mmHTTP')
+    ScrollBars = ssBoth
+    TabOrder = 10
+  end
+  object btFinalize: TButton
+    Left = 505
+    Top = 37
+    Width = 75
+    Height = 25
+    Hint = 'Request a certificate for the specified domain'
+    Anchors = [akTop, akRight]
+    Caption = 'Finalize'
+    Enabled = False
+    TabOrder = 5
+    OnClick = btRegisterClick
+  end
+  object edDomainName: TEdit
+    Left = 87
+    Top = 9
+    Width = 249
+    Height = 21
+    Hint = 'Main domain name'
+    Anchors = [akLeft, akTop, akRight]
+    TabOrder = 0
+    TextHint = 'www.exemple.com'
+  end
+  object cbHTTPChallenges: TCheckBox
+    Left = 345
+    Top = 104
+    Width = 144
+    Height = 17
+    Caption = 'Process HTTP Challenges'
+    Checked = True
+    State = cbChecked
+    TabOrder = 11
+    OnClick = cbHTTPChallengesClick
+  end
   object ExecuteACME1: TExecuteACME
     OnPassword = ExecuteACME1Password
     OnHttpChallenge = ExecuteACME1HttpChallenge
     OnCertificate = ExecuteACME1Certificate
     OnError = ExecuteACME1Error
     OnDone = ExecuteACME1Done
-    Left = 424
-    Top = 96
+    Left = 400
+    Top = 168
   end
   object IdHTTPServer1: TIdHTTPServer
     Bindings = <>
     OnCommandGet = IdHTTPServer1CommandGet
-    Left = 424
-    Top = 152
+    Left = 400
+    Top = 232
   end
 end

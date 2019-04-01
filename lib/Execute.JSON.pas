@@ -742,6 +742,7 @@ var
   Start: Integer;
   Loop : Integer;
 begin
+  Blanks;
   if NextChar = '"' then
   begin
     Result := GetString; // "0"
@@ -779,6 +780,7 @@ end;
 
 function TJSONParser.GetBoolean: Boolean;
 begin
+  Blanks;
   if SkipStr(JSON_TRUE) or SkipStr('"true"') then
     Exit(True);
   if SkipStr(JSON_FALSE) or SkipStr(JSON_NIL) or SkipStr('"false"') then

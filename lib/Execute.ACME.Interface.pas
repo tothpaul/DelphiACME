@@ -2,7 +2,7 @@ unit Execute.ACME;
 
 {
 
-  ACME Delphi client for Let's Encrypt (c)2018 Execute SARL <contact@execute.fr>
+  ACME Delphi client for Let's Encrypt (c)2018-2019 Execute SARL <contact@execute.fr>
 
   This component is NOT FREE !
 
@@ -39,6 +39,17 @@ unit Execute.ACME;
 
   -> OnCertificate
     you have a register certificat in the provided TStrings parameter
+}
+
+{
+ New in version 1.1  (2019-02-18)
+
+   - Add a FinalizeDomain method to check the request status
+     if you need to restart the application, save the OrderURL properties of the component
+
+   - Add SubjectAltNames(SAN) property to register multiples domains
+     DomainName = 'www.mydomain.com'
+     SubjectAlternativeNames = ['ftp.mydomain.com']
 }
 
 interface
@@ -94,50 +105,98 @@ type
   TDomainRegistrationThread = class(TThread)
   end;
 
+  TACMEOrderStatus = (
+    osNone,
+    osPending,
+    osReady,
+    osValid,
+    osInvalid,
+    osExpired,
+    osRevoked,
+    osUnknown
+  );
+	
   TExecuteACME = class(TComponent)
-  private
-    FEnvironment    : TEnvironment;
-    FDirectory      : string;
-    FDomainName     : string;
-    FContactEMail   : string;
-    FAccountKey     : TStrings;
-    FDomainKey      : TStrings;
-    FOnPassword     : TPasswordEvent;
-    FOnHttpChallenge: THttpChallengeEvent;
-    FOnCertificate  : TCertificateEvent;
-    FOnError        : TErrorEvent;
-    FOnDone         : TNotifyEvent;
-    procedure SetEnvironment(Value: TEnvironment);
-    procedure SetDirectory(const Value: string);
-    function IsCustomEnvironment: Boolean;
-    function GetKey(Index: TKeyType): TStrings;
-    procedure SetKey(Index: TKeyType; Value: TStrings);
-    procedure Error(const msg: string);
-    function LoadRSA(AKeyType: TKeyType): pRSA;
-    procedure GetPublicKey(rsa: pRSA; var n, e: TBytes);
-    function GetSigning(KeyType: TKeyType; var n, e: TBytes): pEVP_PKEY;
-    function GetRequest(var n, e: TBytes): TBytes;
-    procedure CheckProperties;
-    function StrToCertificate(const AStr: string; var Domain: string): TBytes;
   public const
+    /// <summary>
+    /// Path of a HTTP Challenge
+    /// </summary>
     WELL_KNOWN_URL = '/.well-known/acme-challenge/';
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
-    function RegisterDomain: TDomainRegistrationThread;
-    function UnregisterDomain(const CRT: string; Reason: TACMERevokeReason): TDomainRegistrationThread;
+    /// <summary>
+    /// Request a new registration<para/>
+    /// </summary>    
+		function RegisterDomain: TDomainRegistrationThread;
+    /// <summary>
+    /// Check last registration status
+    /// </summary>
+    function FinalizeDomain: TDomainRegistrationThread;
+    /// <summary>
+    /// Unregister a Certificat
+    /// </summary>    
+		function UnregisterDomain(const CRT: string; Reason: TACMERevokeReason): TDomainRegistrationThread;
+    /// <summary>
+    /// Generate a RSA Key (for Domain or Account for instance)
+    /// </summary>
     class procedure GeneraRSAKey(Strings: TStrings; const Password: string = ''; KeyLength: Integer = 4096);
+    /// <summary>
+    /// The URL of the Order request
+    /// </summary>
+    property OrderURL: string read FOrderURL write FOrderURL;
+    /// <summary>
+    /// The Status of the Order request
+    /// </summary>
+    property OrderStatus: TACMEOrderStatus read FOrderStatus;
   published
+    /// <summary>
+    /// StagingV2 for testing, ProductionV2 for production
+    /// </summary>
     property Environment: TEnvironment read FEnvironment write SetEnvironment default StagingV2;
+    /// <summary>
+    /// automaticaly set by Environment
+    /// </summary>
     property Directory: string read FDirectory write SetDirectory stored IsCustomEnvironment;
+    /// <summary>
+    /// the DomainName to register
+    /// </summary>
     property DomainName: string read FDomainName write FDomainName;
+    /// <summary>
+    /// alternate domains
+    /// </summary>
+    property SubjectAltNames: TStrings index SUBJECTALTNAMES_INDEX read GetStrings write SetStrings;
+    /// <summary>
+    /// optional contact email
+    /// </summary>
     property ContactEmail: string read FContactEMail write FContactEmail;
-    property AccountKey: TStrings index ktAccount read GetKey write SetKey;
-    property DomainKey: TStrings index ktDomain read GetKey write SetKey;
+    /// <summary>
+    /// a RSA Key for the Let's Encrypt account, can be generated with GeneraRSAKey()
+    /// </summary>
+    property AccountKey: TStrings index ACCOUNTKEY_INDEX read GetStrings write SetStrings;
+    /// <summary>
+    /// a RSA Key for the domain, can be generated with GeneraRSAKey()
+    /// </summary>
+    property DomainKey: TStrings index DOMAINKEY_INDEX read GetStrings write SetStrings;
+    /// <summary>
+    /// fired by the component when a Password is required
+    /// </summary>
     property OnPassword: TPasswordEvent read FOnPassword write FOnPassword;
+    /// <summary>
+    /// fired by the component when a pending (Processed = False) HttpChallenge is found
+    /// </summary>
     property OnHttpChallenge: THttpChallengeEvent read FOnHttpChallenge write FOnHttpChallenge;
+    /// <summary>
+    /// fired when the requested Certificat is available
+    /// </summary>
     property OnCertificate: TCertificateEvent read FOnCertificate write FOnCertificate;
+    /// <summary>
+    /// fired when a error occurs
+    /// </summary>
     property OnError: TErrorEvent read FOnError write FOnError;
+    /// <summary>
+    /// fired when the request is done without any other event, you can check OrderStatus
+    /// </summary>
     property OnDone: TNotifyEvent read FOnDone write FOnDone;
   end;
 

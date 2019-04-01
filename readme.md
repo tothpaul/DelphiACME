@@ -28,6 +28,8 @@ Domain.key is the private key for the domain (same recommandations).
 	
 ## How does it work ?
 
+(you have to do this periodically  because the certificate lives only for 90 days !)
+
 ### 1. Registration request
 	TExecuteACME.RegisterDomain();
 	 -> Account.key     -> register a Let's Encrypt account.
@@ -37,9 +39,7 @@ Domain.key is the private key for the domain (same recommandations).
 ### 2. HTTP Challenge
 	Let's Encrypt -> http://(domain)/.well-known/acme-challenge/(token) <- Thumbprint
 ### 3. Retrieve the certificate
-(you have to do this periodically  because the certificate lives only for 90 days !)
-
-	TExecuteACME.RegisterDomain();
+	TExecuteACME.FinalizeDomain();
 	 -> Account.key     -> Retrieve account status.
 	 -> Domain.key      -> Retrieve the Certificate from Let's Encrypt.
 	 -> OnCertificate   -> store the updated certificate.
@@ -47,6 +47,15 @@ Domain.key is the private key for the domain (same recommandations).
 	 TExecuteACME.UnRegisterDomain();
 	 -> Domain.key      -> Revoke Certificat
 	 -> OnDone          -> the certificate is revoked.
+	 
+## New features in version 1.1
+
+Better error handling with error report
+SubjectAltNames let you define alternative names for the DomainName
+new OrderURL and OrderStatus properties
+FinalizeDomain is now used (with OrderURL) to retrieve the last requested Certificat
+OnHttpChallenge has a new parameter Processed to let you delay the challenge (call FinalizeDomain when the challenge is ready, the event will be fired again and then you can set Processed to True)
+
 ## Licence
 
 this repository contains the full source code of the demo application for the CLOSED SOURCE component TExecuteACME.

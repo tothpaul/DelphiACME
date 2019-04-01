@@ -2,9 +2,26 @@ unit ACMEDemo.Main;
 
 {
    Sample demonstration of Execute's TExecuteACME component for Delphi
-   (c)2018 Execute SARL
+   (c)2018-2019 Execute SARL
 
    <contact@execute.fr>
+
+}
+
+{
+
+  New in version 1.1
+
+    - better error handling
+
+    - new parameter on OnHTTPChallenge event to specify whether the Challenge has been processed.
+
+    - the FinalizeDomain method is now used to get the Certificat instead of a new RegisterDomain call
+
+    - the public property OrderURL is required by FinalizeDomain
+      you have to save and restore it if you want to restart the application before finalizing the registration.
+
+    - multiple sub domains can be defined with SubjectAltNames.
 
 }
 
@@ -20,30 +37,40 @@ uses
   IdContext, IdCustomHTTPServer, IdBaseComponent, IdComponent,
   IdCustomTCPServer, IdHTTPServer,
 
-// init this to be sure that OpenSSL is available (but it's not required)
+// to call idSSLOpenSSLHeaders.Load
   idSSLOpenSSLHeaders,
 
 // ACME component (dependencies: Indy, Execute.JSON, Execute.RTTI)
   Execute.ACME;
 
 type
+  TChallenge = record
+    Domain    : string;
+    Token     : string;
+  end;
+
   TForm1 = class(TForm)
     ExecuteACME1: TExecuteACME;
     IdHTTPServer1: TIdHTTPServer;
     Memo1: TMemo;
     btRegister: TButton;
-    Label1: TLabel;
-    edDomain: TEdit;
     Label2: TLabel;
     edContact: TEdit;
     btSave: TButton;
     cbMode: TComboBox;
     btUnregister: TButton;
     btLoad: TButton;
+    Label3: TLabel;
+    mmSubjectAltNames: TMemo;
+    mmHTTP: TMemo;
+    btFinalize: TButton;
+    Label1: TLabel;
+    edDomainName: TEdit;
+    cbHTTPChallenges: TCheckBox;
     function ExecuteACME1Password(Sender: TObject; KeyType: TKeyType;
       var Password: string): Boolean;
     procedure ExecuteACME1HttpChallenge(Sender: TObject; const Domain, Token,
-      Thumbprint: string);
+      Thumbprint: string; var Processed: Boolean);
     procedure ExecuteACME1Certificate(Sender: TObject; Certificate: TStrings);
     procedure IdHTTPServer1CommandGet(AContext: TIdContext;
       ARequestInfo: TIdHTTPRequestInfo; AResponseInfo: TIdHTTPResponseInfo);
@@ -53,13 +80,12 @@ type
     procedure btSaveClick(Sender: TObject);
     procedure btLoadClick(Sender: TObject);
     procedure ExecuteACME1Done(Sender: TObject);
+    procedure cbHTTPChallengesClick(Sender: TObject);
   private
     { Déclarations privées }
-    FDomain    : string;
-    FToken     : string;
+    FChallenges: TArray<TChallenge>;
     FThumbprint: string;
     procedure LoadOrCreateKey(Key: TStrings; const Name: string);
-    procedure WMUser(var Msg: TMessage); message WM_USER;
   public
     { Déclarations publiques }
   end;
@@ -99,7 +125,7 @@ begin
     ) <> mrYes then
       Exit;
     Str := '';
-    if not InputQuery('Protect your key with a password', 'Password for ' + Name,  Str) then
+    if not InputQuery('Protect your key with a password', #1'Password for ' + Name,  Str) then
       Exit;
     TExecuteACME.GeneraRSAKey(Key, Str);
     Key.SaveToFile(Name);
@@ -114,17 +140,25 @@ begin
   else
     ExecuteACME1.Environment := TEnvironment.ProductionV2;
 
-  ExecuteACME1.DomainName := edDomain.Text;
+  ExecuteACME1.DomainName := edDomainName.Text;
   ExecuteACME1.ContactEmail := edContact.Text;
+  // added in version 1.1
+  ExecuteACME1.SubjectAltNames.Assign(mmSubjectAltNames.Lines);
 
   if Sender = btRegister then
   begin
   // need to handle HTTP Challenge
-    idHTTPServer1.Active := True;
+    idHTTPServer1.Active := cbHTTPChallenges.Checked;
   // start registration process
     ExecuteACME1.RegisterDomain;
-  end else begin
+  end else
+  if Sender = btUnregister then
+  begin
     ExecuteACME1.UnregisterDomain(Memo1.Lines.Text, TACMERevokeReason.unspecified);
+  end else
+  if Sender = btFinalize then
+  begin
+    ExecuteACME1.FinalizeDomain;
   end;
 end;
 
@@ -138,7 +172,7 @@ begin
     Name := 'Account'
   else
     Name := 'Domain';
-  Result := InputQuery(Name + ' Key', Name + ' password', Password);
+  Result := InputQuery(Name + ' Key', #1 + Name + ' password', Password);
 end;
 
 // upon registration, you have to create an HTTP response
@@ -149,28 +183,59 @@ end;
 // need to returns
 //   <Token>.<Thumbprint>
 procedure TForm1.ExecuteACME1HttpChallenge(Sender: TObject; const Domain, Token,
-  Thumbprint: string);
+  Thumbprint: string; var Processed: Boolean);
+var
+  Count: Integer;
+  Index: Integer;
+  Found: Integer;
 begin
-  FDomain := Domain;
-  FToken := Token;
+// this array if required only for multiple subdomains (one Token per domain)
+  Count := Length(FChallenges);
+  Found := -1;
+  for Index := 0 to Count - 1 do
+  begin
+    if FChallenges[Index].Domain = Domain then
+    begin
+      Found := Index;
+      Break;
+    end;
+  end;
+  if Found = -1 then
+  begin
+    Found := Count;
+    SetLength(FChallenges, Count + 1);
+    FChallenges[Found].Domain := Domain;
+  end;
+  FChallenges[Found].Token := Token;
   FThumbprint := Thumbprint;
+
+// is the Challenge ready ?
+// False by default, don't set it True until the HTTP server can reply to the Challenge !
+// This event is fired at each call to FinalizeDomain until you set Processed to True
+// if you set Processed to True while the HTTP server is not ready the Order will go to the Invalid state.
+  Processed := idHTTPServer1.Active;
+
+  btFinalize.Enabled := True;
 end;
 
 // idHTTP server response to the well known ACME challenge
+// all the subdomains are supposed to be handled by this application !!!
 procedure TForm1.IdHTTPServer1CommandGet(AContext: TIdContext;
   ARequestInfo: TIdHTTPRequestInfo; AResponseInfo: TIdHTTPResponseInfo);
+var
+  Index: Integer;
 begin
-  if ARequestInfo.URI = TExecuteACME.WELL_KNOWN_URL + FToken then
+  mmHTTP.Lines.Add(ARequestInfo.URI);
+  for Index := 0 to Length(FChallenges) - 1 do
+begin
+    if ARequestInfo.URI = TExecuteACME.WELL_KNOWN_URL + FChallenges[Index].Token then
   begin
-    AResponseInfo.ContentText := FToken + '.' + FThumbprint;
-    PostMessage(Handle, WM_USER, 0, 0);
+      AResponseInfo.ContentType := 'application/octet-stream';
+      AResponseInfo.ContentText := FChallenges[Index].Token + '.' + FThumbprint;
+      mmHTTP.Lines.Add('Challenge for ' + FChallenges[Index].Domain + ' : ' + FChallenges[Index].Token + '.' + FThumbprint);
   end;
 end;
 
-// just a feedback of the HTTP Challenge request
-procedure TForm1.WMUser(var Msg: TMessage);
-begin
-  ShowMessage('HTTP Challenge done !');
 end;
 
 // the certificate is validated, you can save it
@@ -219,16 +284,29 @@ begin
    Memo1.Lines.SaveToFile(Str);
 end;
 
+procedure TForm1.cbHTTPChallengesClick(Sender: TObject);
+begin
+  idHTTPServer1.Active := cbHTTPChallenges.Checked;
+end;
+
 procedure TForm1.ExecuteACME1Error(Sender: TObject; const Error: string);
 begin
-  ShowMessage(Error);
+  mmHTTP.Lines.Add(Error);
+  MessageDlg(Error, mtWarning, [mbOK], 0);
 end;
 
 procedure TForm1.ExecuteACME1Done(Sender: TObject);
 begin
-// the first request will probably not deliver a certificat
-// you have to request it once again after the HttpChallenge is done
-  ShowMessage('Request done');
+  case ExecuteACME1.OrderStatus of
+    osNone   : ShowMessage('Request done');
+    osPending: ShowMessage('Call FinalizeDomain when the Challenges are processed');
+    osReady  : ShowMessage('Call FinalizeDomain to finalize the Order');
+    osValid  : ShowMessage('Call FinalizeDomain to get the Certificat');
+    osInvalid: ShowMessage('The challenge failed, call FinalizeDomain to get the error or RegisterDomain to start a new Challenge');
+    osExpired: ShowMessage('The certificat has expired, you should call RegisterDomain to renew it');
+    osRevoked: ShowMessage('The certificat is revoked');
+    osUnknown: ShowMessage('Unknow error, check OrderURL (' + ExecuteACME1.OrderURL + ')');
+  end;
 end;
 
 
