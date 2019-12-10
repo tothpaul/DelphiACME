@@ -289,6 +289,7 @@ type
   JSON = class
     class var CountList: Boolean;
     class var TimeSeparator: Char;
+    class var NullString: string;
     class function buildJSON(TypeInfo: PTypeInfo; Instance: Pointer): string;
     class function toJSON<T>(const instance :T): string; inline;
     class procedure fromJSON<T>(var instance: T; const Str: string); inline;
@@ -1168,7 +1169,7 @@ begin
     begin
 //      BuildJSONClass(PPointer(Instance)^, Builder);
       if PPointer(Instance)^= nil then
-        Append(JSON_NIL)
+        Append(JSON.NullString)
       else
         BuildJSONClass(PTypeInfo(TObject(Instance^).ClassInfo), PPointer(Instance^));
     end;
@@ -1182,14 +1183,14 @@ begin
     tkLString :
     begin
       if PPointer(Instance^) = nil then
-        Append(JSON_NIL)
+        Append(JSON.NullString)
       else
         AppendString(string(PAnsiString(Instance)^));
     end;
     tkUString :
     begin
       if PPointer(Instance^) = nil then
-        Append(JSON_NIL)
+        Append(JSON.NullString)
       else
         AppendString(PString(Instance)^);
     end;
@@ -1809,6 +1810,7 @@ initialization
   JSONFormat.TwoDigitYearCenturyWindow := 50;
   JSONFormat.NegCurrFormat := 0;
   JSON.TimeSeparator := 'T';
+  JSON.NullString := 'null';
 end.
 
 

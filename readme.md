@@ -1,5 +1,5 @@
 # ACME (Let's Encrypt protocol) component for Delphi Tokyo and Rio
-(c)2018 by [Execute SARL](http://www.execute.fr)
+(c)2018-2019 by [Execute SARL](http://www.execute.fr)
 
 ## Purpose
 
@@ -48,13 +48,21 @@ Domain.key is the private key for the domain (same recommandations).
 	 -> Domain.key      -> Revoke Certificat
 	 -> OnDone          -> the certificate is revoked.
 	 
-## New features in version 1.1
+## version 1.1
 
 Better error handling with error report
+
 SubjectAltNames let you define alternative names for the DomainName
+
 new OrderURL and OrderStatus properties
+
 FinalizeDomain is now used (with OrderURL) to retrieve the last requested Certificat
+
 OnHttpChallenge has a new parameter Processed to let you delay the challenge (call FinalizeDomain when the challenge is ready, the event will be fired again and then you can set Processed to True)
+
+## version 1.2
+
+Support for [POST-as-GET](https://community.letsencrypt.org/t/acme-breaking-change-most-gets-become-posts/71025) protocol change.
 
 ## Licence
 
