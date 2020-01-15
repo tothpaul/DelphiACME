@@ -11,7 +11,9 @@ In both case you need to manage the domain's HTTP (not HTTPS) server.
 
 ## Installation
 
-this component is compatible with Delphi Tokyo 10.2.3 (even the Community Edition) and Rio.
+this component is compatible with Delphi Berlin 10.1, Tokyo 10.2.3 and Rio 10.3 (even the Community Edition).
+
+note that this repository contains the a Tokoy compatible DCU for testing purpose only.
 
 1. Download the repository
 2. Open ACMEGroup.groupproj
