@@ -1,5 +1,5 @@
 # ACME (Let's Encrypt protocol) component for Delphi Tokyo and Rio
-(c)2018-2019 by [Execute SARL](http://www.execute.fr)
+(c)2018-2020 by [Execute SARL](http://www.execute.fr)
 
 ## Purpose
 
@@ -13,7 +13,7 @@ In both case you need to manage the domain's HTTP (not HTTPS) server.
 
 this component is compatible with Delphi Berlin 10.1, Tokyo 10.2.3 and Rio 10.3 (even the Community Edition).
 
-note that this repository contains the a Tokoy compatible DCU for testing purpose only.
+**New**: this repository contains Rio compatible DCU (Win32, Win64 and Linux) for testing purpose only, they accepts only Staging environment.
 
 1. Download the repository
 2. Open ACMEGroup.groupproj
@@ -21,7 +21,7 @@ note that this repository contains the a Tokoy compatible DCU for testing purpos
 4. Select the ACMEDemo project
 5. Compile and run the Application
 
-the application requires OpenSSL (libeay32.dll and ssleay32.dll)
+the application requires OpenSSL (for Windows : libeay32.dll and ssleay32.dll)
 on the first start, the application can create Account.key and Domain.key for you, (generating a 4096bits take some time, this is normal).
 
 Account.key will be your Let's Encrypt account private key, place it on a safe place (with a password).
@@ -66,11 +66,17 @@ OnHttpChallenge has a new parameter Processed to let you delay the challenge (ca
 
 Support for [POST-as-GET](https://community.letsencrypt.org/t/acme-breaking-change-most-gets-become-posts/71025) protocol change.
 
+## version 1.3
+
+Support for 64bits and Linux
+
+Suport for synchronous  calls with *Now methods
+
 ## Licence
 
 this repository contains the full source code of the demo application for the CLOSED SOURCE component TExecuteACME.
 
-you'll find the compiled Execute.ACME.dcu unit (only for Tokyo 10.2.3) in the [lib](/lib) folder and the Interface part of the Unit in [Execute.ACME.Interface.pas](lib/Execute.ACME.Interface.pas).
+you'll find the compiled Execute.ACME.dcu unit in the [lib](/lib) folder and the Interface part of the Unit in [Execute.ACME.Interface.pas](lib/Execute.ACME.Interface.pas).
 
 ![screen](ACME-Component.png)
 

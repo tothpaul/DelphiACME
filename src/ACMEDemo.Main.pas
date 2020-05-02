@@ -2,7 +2,7 @@ unit ACMEDemo.Main;
 
 {
    Sample demonstration of Execute's TExecuteACME component for Delphi
-   (c)2018-2019 Execute SARL
+   (c)2018-2020 Execute SARL
 
    <contact@execute.fr>
 

@@ -144,6 +144,7 @@ WARNING : inline fixed sized array do not have RTTI information
 
 interface
 {$WARN WIDECHAR_REDUCED OFF}
+{$ZEROBASEDSTRINGS OFF}
 uses
   System.Classes,
   System.SysUtils,
@@ -249,8 +250,8 @@ type
     function EndObject: Boolean;
     function BeginArray: Boolean;
     function EndArray: Boolean;
-    function OpenArray(var Count: Integer): Boolean;
-    function CloseArray(Count: Integer): Boolean;
+    function OpenArray(var Count: NativeInt): Boolean;
+    function CloseArray(Count: NativeInt): Boolean;
   end;
 
   // the ParseChain works like the BuildChain
@@ -454,7 +455,7 @@ begin
   Result := '"' + Str + '"';
   Len := Length(Result);
   for Index := 2 to Len - 1 do
-    if (Result[Index] in ['\', '"', #13, #10]) then
+    if (Result[Index] in ['\', '"', #13, #10, #9]) then
     begin
       Result[Index] := '\';
       Inc(Escape);
@@ -470,6 +471,9 @@ begin
     if Result[Index] = '\' then
     begin
       Ch := Str[Index - 1];
+      if Ch = #9 then
+        Ch := 't'
+      else
       if Ch = #10 then
         Ch := 'n'
       else
@@ -611,7 +615,7 @@ end;
 
 function TJSONParser.GetValue: string;
 var
-  count: Integer;
+  count: NativeInt;
 begin
   Blanks;
   if NextChar = '"' then
@@ -718,7 +722,7 @@ end;
 
 procedure TJSONParser.GetStrings(List: TStrings);
 var
-  Count: Integer;
+  Count: NativeInt;
 begin
   if OpenArray(count) then
   begin
@@ -804,6 +808,7 @@ var
   Str: string;
   Int: Int64;
 begin
+  Blanks;
   if SkipStr(JSON_NIL) or SkipStr('""') then
     Result := 0
   else begin
@@ -811,9 +816,14 @@ begin
     begin
       Str := GetString;
       if TryStrToInt64(Str, Int) then  // "time"
+      begin
+        if Int <= 0 then
+          Result := 0
+        else
         Result := UnixToDateTime(Int, False)
-      else
+      end else begin
         Result := JSONDecodeDateTime(Str) // "yyy-mm-ddThh:nn"
+      end;
     end else begin
       Result := UnixToDateTime(GetInt64, False);
     end;
@@ -855,7 +865,7 @@ begin
   Result := True;
 end;
 
-function TJSONParser.OpenArray(var Count: Integer): Boolean;
+function TJSONParser.OpenArray(var Count: NativeInt): Boolean;
 begin
   Count := -1;
   Blanks;
@@ -877,7 +887,7 @@ begin
   end;
 end;
 
-function TJSONParser.CloseArray(Count: Integer): Boolean;
+function TJSONParser.CloseArray(Count: NativeInt): Boolean;
 begin
   Result := EndArray();
   if Result and (Count >= 0) then
@@ -1554,8 +1564,8 @@ end;
 procedure TJSONParser.ParseJSONDynArray(TypeInfo: PTypeInfo; Instance: Pointer);
 var
   Item : PByte;
-  Len  : Integer;
-  Count: Integer;
+  Len  : NativeInt;
+  Count: NativeInt;
 begin
   if OpenArray(Count) then
   begin

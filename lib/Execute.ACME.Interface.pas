@@ -2,7 +2,7 @@ unit Execute.ACME;
 
 {
 
-  ACME Delphi client for Let's Encrypt (c)2018-2019 Execute SARL <contact@execute.fr>
+  ACME Delphi client for Let's Encrypt (c)2018-2020 Execute SARL <contact@execute.fr>
 
   This component is NOT FREE !
 
@@ -52,13 +52,31 @@ unit Execute.ACME;
      SubjectAlternativeNames = ['ftp.mydomain.com']
 }
 
+{
+  version 1.2 (2019-12-10)
+
+    - POST-as-GET support
+}
+
+{
+  version 1.3 (2020-04-08)
+
+   - extract local types from Record because of bad support by the IDE
+   - Linux64 support
+   - add *Now method for direct call of methods (no thread)
+}
+
 interface
+{$ZEROBASEDSTRINGS OFF}
+
 {$IFDEF DEBUG}
 {--$DEFINE LOG}
 {$ENDIF}
 uses
 {$IFDEF LOG}
+{$IFDEF MSWINDOWS}
   Winapi.Windows,
+{$ENDIF}
 {$ENDIF}
   System.SysUtils,
   System.Classes,
@@ -66,6 +84,9 @@ uses
   idHTTP,
   IdSSLOpenSSL,
   IdSSLOpenSSLHeaders,
+{$IFDEF LINUX64}
+  IdGlobal,
+{$ENDIF}
   Execute.RTTI,
   Execute.JSON;
 
@@ -98,11 +119,14 @@ type
   );
 
   TPasswordEvent = function(Sender: TObject; KeyType: TKeyType; var Password: string): Boolean of object;
-  THttpChallengeEvent = procedure(Sender: TObject; const Domain, Token, Thumbprint: string) of object;
+  THttpChallengeEvent = procedure(Sender: TObject; const Domain, Token, Thumbprint: string; var Processed: Boolean) of object;
   TCertificateEvent = procedure(Sender: TObject; Certificate: TStrings) of object;
   TErrorEvent = procedure(Sender: TObject; const Error: string) of object;
 
-  TDomainRegistrationThread = class(TThread)
+  TDomainRegistrationThread = class
+  end;
+  
+  TSubmitThread = class(TThread)
   end;
 
   TACMEOrderStatus = (
@@ -126,17 +150,41 @@ type
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
     /// <summary>
-    /// Request a new registration<para/>
+    ///  same as RegisterDomain or RegisterDomainNow
     /// </summary>    
-		function RegisterDomain: TDomainRegistrationThread;
+    function DoRegisterDomain(Submit: Boolean): TDomainRegistrationThread;
     /// <summary>
-    /// Check last registration status
+    ///  same as FinalizeDomain or FinalizeDomainNow
     /// </summary>
-    function FinalizeDomain: TDomainRegistrationThread;
+    function DoFinalizeDomain(Submit: Boolean): TDomainRegistrationThread;
     /// <summary>
-    /// Unregister a Certificat
+    ///  same as UnregisterDomain or UnregisterDomainNow
     /// </summary>    
-		function UnregisterDomain(const CRT: string; Reason: TACMERevokeReason): TDomainRegistrationThread;
+    function DoUnregisterDomain(const CRT: string; Reason: TACMERevokeReason; Submit: Boolean): TDomainRegistrationThread;
+    /// <summary>
+    /// Request a new registration - in a thread
+    /// </summary>
+    function RegisterDomain: TDomainRegistrationThread; inline;
+    /// <summary>
+    /// Request a new registration - direct call
+    /// </summary>
+    procedure RegisterDomainNow; inline;
+    /// <summary>
+    /// Check last registration status - in a thread
+    /// </summary>
+    function FinalizeDomain: TDomainRegistrationThread; inline;
+    /// <summary>
+    /// Check last registration status - direct call
+    /// </summary>
+    procedure FinalizeDomainNow; inline;
+    /// <summary>
+    /// Unregister a Certificat - in a thread
+    /// </summary>
+    function UnregisterDomain(const CRT: string; Reason: TACMERevokeReason): TDomainRegistrationThread; inline;
+    /// <summary>
+    /// Unregister a Certificat - direct call
+    /// </summary>
+    procedure UnregisterDomainNow(const CRT: string; Reason: TACMERevokeReason); inline;
     /// <summary>
     /// Generate a RSA Key (for Domain or Account for instance)
     /// </summary>
@@ -204,6 +252,8 @@ implementation
 
 {$WARNING ! Source code available on https://store.execute.fr ! }
 
+{$IFDEF MSWINDOWS}
 initialization
 {$IFDEF LOG}AllocConsole;{$ENDIF}
+{$ENDIF}
 end.

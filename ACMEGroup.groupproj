@@ -12,6 +12,9 @@
         <Projects Include="src\ACMEDemo.dproj">
             <Dependencies>lib\Execute.ACMERuntime.dproj</Dependencies>
         </Projects>
+        <Projects Include="src2\ACMEConsole.dproj">
+            <Dependencies/>
+        </Projects>
     </ItemGroup>
     <ProjectExtensions>
         <Borland.Personality>Default.Personality.12</Borland.Personality>
@@ -47,14 +50,23 @@
     <Target Name="ACMEDemo:Make" DependsOnTargets="Execute.ACMERuntime:Make">
         <MSBuild Projects="src\ACMEDemo.dproj" Targets="Make"/>
     </Target>
+    <Target Name="ACMEConsole">
+        <MSBuild Projects="src2\ACMEConsole.dproj"/>
+    </Target>
+    <Target Name="ACMEConsole:Clean">
+        <MSBuild Projects="src2\ACMEConsole.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="ACMEConsole:Make">
+        <MSBuild Projects="src2\ACMEConsole.dproj" Targets="Make"/>
+    </Target>
     <Target Name="Build">
-        <CallTarget Targets="Execute_ACMERuntime;Execute_ACMEDesign;ACMEDemo"/>
+        <CallTarget Targets="Execute_ACMERuntime;Execute_ACMEDesign;ACMEDemo;ACMEConsole"/>
     </Target>
     <Target Name="Clean">
-        <CallTarget Targets="Execute_ACMERuntime:Clean;Execute_ACMEDesign:Clean;ACMEDemo:Clean"/>
+        <CallTarget Targets="Execute_ACMERuntime:Clean;Execute_ACMEDesign:Clean;ACMEDemo:Clean;ACMEConsole:Clean"/>
     </Target>
     <Target Name="Make">
-        <CallTarget Targets="Execute_ACMERuntime:Make;Execute_ACMEDesign:Make;ACMEDemo:Make"/>
+        <CallTarget Targets="Execute_ACMERuntime:Make;Execute_ACMEDesign:Make;ACMEDemo:Make;ACMEConsole:Make"/>
     </Target>
     <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
 </Project>
