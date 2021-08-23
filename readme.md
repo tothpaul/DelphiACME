@@ -77,7 +77,7 @@ Suport for synchronous  calls with *Now methods
 
 ## version 1.4
 
-Swith from TidHTTP to System.Net.HTTPClient for TLS 1.3 support. 
+Switch from TidHTTP to System.Net.HTTPClient for TLS 1.3 support. 
 
 ## Licence
 
