@@ -2,7 +2,7 @@ unit Execute.ACME;
 
 {
 
-  ACME Delphi client for Let's Encrypt (c)2018-2020 Execute SARL <contact@execute.fr>
+  ACME Delphi client for Let's Encrypt (c)2018-2021 Execute SARL <contact@execute.fr>
 
   This component is NOT FREE !
 
@@ -66,11 +66,20 @@ unit Execute.ACME;
    - add *Now method for direct call of methods (no thread)
 }
 
+{
+  version 1.4 (2021-08-23)
+
+    - switch from Indy TidHTTP to System.Net.HTTPClient for TLS 1.3 support
+    - version tested only with Delphi 10.4.2
+}
+
 interface
 {$ZEROBASEDSTRINGS OFF}
 
+{.$DEFINE INDY} // INDY still don't support TLS 1.3 !
+
 {$IFDEF DEBUG}
-{--$DEFINE LOG}
+{.$DEFINE LOG}
 {$ENDIF}
 uses
 {$IFDEF LOG}
@@ -86,6 +95,9 @@ uses
   IdSSLOpenSSLHeaders,
 {$IFDEF LINUX64}
   IdGlobal,
+{$ENDIF}
+{$IFNDEF INDY}
+  System.Net.HttpClient,
 {$ENDIF}
   Execute.RTTI,
   Execute.JSON;
@@ -139,7 +151,7 @@ type
     osRevoked,
     osUnknown
   );
-	
+
   TExecuteACME = class(TComponent)
   public const
     /// <summary>
@@ -151,7 +163,7 @@ type
     destructor Destroy; override;
     /// <summary>
     ///  same as RegisterDomain or RegisterDomainNow
-    /// </summary>    
+    /// </summary>
     function DoRegisterDomain(Submit: Boolean): TDomainRegistrationThread;
     /// <summary>
     ///  same as FinalizeDomain or FinalizeDomainNow
@@ -159,7 +171,7 @@ type
     function DoFinalizeDomain(Submit: Boolean): TDomainRegistrationThread;
     /// <summary>
     ///  same as UnregisterDomain or UnregisterDomainNow
-    /// </summary>    
+    /// </summary>
     function DoUnregisterDomain(const CRT: string; Reason: TACMERevokeReason; Submit: Boolean): TDomainRegistrationThread;
     /// <summary>
     /// Request a new registration - in a thread

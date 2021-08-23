@@ -1,5 +1,5 @@
-# ACME (Let's Encrypt protocol) component for Delphi Tokyo and Rio
-(c)2018-2020 by [Execute SARL](http://www.execute.fr)
+# ACME (Let's Encrypt protocol) component for Delphi Tokyo, Rio and Sydney
+(c)2018-2021 by [Execute SARL](http://www.execute.fr)
 
 ## Purpose
 
@@ -11,9 +11,9 @@ In both case you need to manage the domain's HTTP (not HTTPS) server.
 
 ## Installation
 
-this component is compatible with Delphi Berlin 10.1, Tokyo 10.2.3 and Rio 10.3 (even the Community Edition).
+this component is compatible with Delphi Berlin 10.1, Tokyo 10.2.3, Rio 10.3 and Sydney 10.4.2 (even the Community Edition) .
 
-**New**: this repository contains Rio compatible DCU (Win32, Win64 and Linux) for testing purpose only, they accepts only Staging environment.
+**New**: this repository contains Sydney compatible DCU (Win32, Win64 and Linux) for testing purpose only, they accepts only Staging environment.
 
 1. Download the repository
 2. Open ACMEGroup.groupproj
@@ -27,6 +27,9 @@ on the first start, the application can create Account.key and Domain.key for yo
 Account.key will be your Let's Encrypt account private key, place it on a safe place (with a password).
 
 Domain.key is the private key for the domain (same recommandations).
+
+if you have an error like "SSL routunes:ssl3_read_bytes:tslv1 alert protocol version", you should update the component to version 1.4.
+The component used Indy socket, but TLS 1.3 is not supported, so in version 1.4 I've swtiched to System.Net.HTTPClient
 	
 ## How does it work ?
 
@@ -71,6 +74,10 @@ Support for [POST-as-GET](https://community.letsencrypt.org/t/acme-breaking-chan
 Support for 64bits and Linux
 
 Suport for synchronous  calls with *Now methods
+
+## version 1.4
+
+Swith from TidHTTP to System.Net.HTTPClient for TLS 1.3 support. 
 
 ## Licence
 

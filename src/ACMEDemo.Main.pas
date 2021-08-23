@@ -271,7 +271,7 @@ procedure TForm1.btSaveClick(Sender: TObject);
 var
   Str: string;
 begin
-  Str := 'Domaine.crt';
+  Str := 'Domain.crt';
   if PromptForFileName(
    Str,
    'Certificat (*.crt)|*.crt|All files(*.*)|*.*',
