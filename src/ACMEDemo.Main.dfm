@@ -1,7 +1,7 @@
 object Form1: TForm1
   Left = 0
   Top = 0
-  Caption = 'TExecuteACME Demo (c)2018-2019 Execute SARL'
+  Caption = 'TExecuteACME Demo (c)2018-2023 Execute SARL'
   ClientHeight = 672
   ClientWidth = 588
   Color = clBtnFace
@@ -10,12 +10,10 @@ object Form1: TForm1
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
-  OldCreateOrder = False
   OnCreate = FormCreate
   DesignSize = (
     588
     672)
-  PixelsPerInch = 96
   TextHeight = 13
   object Label2: TLabel
     Left = 10
@@ -41,7 +39,7 @@ object Form1: TForm1
   object Memo1: TMemo
     Left = 8
     Top = 127
-    Width = 572
+    Width = 568
     Height = 415
     Anchors = [akLeft, akTop, akRight, akBottom]
     Lines.Strings = (
@@ -85,7 +83,7 @@ object Form1: TForm1
     TabOrder = 9
   end
   object btRegister: TButton
-    Left = 505
+    Left = 501
     Top = 8
     Width = 75
     Height = 25
@@ -98,7 +96,7 @@ object Form1: TForm1
   object edContact: TEdit
     Left = 87
     Top = 36
-    Width = 249
+    Width = 245
     Height = 21
     Hint = 'An optional contact email'
     Anchors = [akLeft, akTop, akRight]
@@ -106,7 +104,7 @@ object Form1: TForm1
     TextHint = 'contact@example.com'
   end
   object btSave: TButton
-    Left = 424
+    Left = 420
     Top = 37
     Width = 75
     Height = 25
@@ -118,7 +116,7 @@ object Form1: TForm1
     OnClick = btSaveClick
   end
   object cbMode: TComboBox
-    Left = 345
+    Left = 341
     Top = 9
     Width = 154
     Height = 22
@@ -133,7 +131,7 @@ object Form1: TForm1
       'Production')
   end
   object btUnregister: TButton
-    Left = 505
+    Left = 501
     Top = 65
     Width = 75
     Height = 25
@@ -144,7 +142,7 @@ object Form1: TForm1
     OnClick = btRegisterClick
   end
   object btLoad: TButton
-    Left = 344
+    Left = 340
     Top = 37
     Width = 75
     Height = 25
@@ -165,7 +163,7 @@ object Form1: TForm1
   object mmHTTP: TMemo
     Left = 8
     Top = 548
-    Width = 572
+    Width = 568
     Height = 116
     Anchors = [akLeft, akRight, akBottom]
     Lines.Strings = (
@@ -174,7 +172,7 @@ object Form1: TForm1
     TabOrder = 10
   end
   object btFinalize: TButton
-    Left = 505
+    Left = 501
     Top = 37
     Width = 75
     Height = 25
@@ -188,7 +186,7 @@ object Form1: TForm1
   object edDomainName: TEdit
     Left = 87
     Top = 9
-    Width = 249
+    Width = 245
     Height = 21
     Hint = 'Main domain name'
     Anchors = [akLeft, akTop, akRight]
@@ -196,8 +194,8 @@ object Form1: TForm1
     TextHint = 'www.exemple.com'
   end
   object cbHTTPChallenges: TCheckBox
-    Left = 345
-    Top = 104
+    Left = 344
+    Top = 80
     Width = 144
     Height = 17
     Caption = 'Process HTTP Challenges'
@@ -206,9 +204,21 @@ object Form1: TForm1
     TabOrder = 11
     OnClick = cbHTTPChallengesClick
   end
+  object cbDNSChallenges: TCheckBox
+    Left = 344
+    Top = 103
+    Width = 144
+    Height = 17
+    Caption = 'Process DNS Challenges'
+    Checked = True
+    State = cbChecked
+    TabOrder = 12
+    OnClick = cbDNSChallengesClick
+  end
   object ExecuteACME1: TExecuteACME
     OnPassword = ExecuteACME1Password
     OnHttpChallenge = ExecuteACME1HttpChallenge
+    OnDnsChallenge = ExecuteACME1DnsChallenge
     OnCertificate = ExecuteACME1Certificate
     OnError = ExecuteACME1Error
     OnDone = ExecuteACME1Done

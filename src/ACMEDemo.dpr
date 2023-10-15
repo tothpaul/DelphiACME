@@ -2,7 +2,8 @@ program ACMEDemo;
 
 uses
   Vcl.Forms,
-  ACMEDemo.Main in 'ACMEDemo.Main.pas' {Form1};
+  ACMEDemo.Main in 'ACMEDemo.Main.pas' {Form1},
+  ACMEDemo.DNSChallenge in 'ACMEDemo.DNSChallenge.pas' {DNSChallenge};
 
 {$R *.res}
 

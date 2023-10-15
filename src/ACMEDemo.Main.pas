@@ -67,6 +67,7 @@ type
     Label1: TLabel;
     edDomainName: TEdit;
     cbHTTPChallenges: TCheckBox;
+    cbDNSChallenges: TCheckBox;
     function ExecuteACME1Password(Sender: TObject; KeyType: TKeyType;
       var Password: string): Boolean;
     procedure ExecuteACME1HttpChallenge(Sender: TObject; const Domain, Token,
@@ -81,6 +82,9 @@ type
     procedure btLoadClick(Sender: TObject);
     procedure ExecuteACME1Done(Sender: TObject);
     procedure cbHTTPChallengesClick(Sender: TObject);
+    procedure cbDNSChallengesClick(Sender: TObject);
+    procedure ExecuteACME1DnsChallenge(Sender: TObject; const Domain,
+      Digest: string; var Processed: Boolean);
   private
     { Déclarations privées }
     FChallenges: TArray<TChallenge>;
@@ -96,6 +100,8 @@ var
 implementation
 
 {$R *.dfm}
+
+uses ACMEDemo.DNSChallenge;
 
 // Load or Create private keys
 //   one for the Let's Ecrypt account
@@ -227,15 +233,14 @@ var
 begin
   mmHTTP.Lines.Add(ARequestInfo.URI);
   for Index := 0 to Length(FChallenges) - 1 do
-begin
-    if ARequestInfo.URI = TExecuteACME.WELL_KNOWN_URL + FChallenges[Index].Token then
   begin
+    if ARequestInfo.URI = TExecuteACME.WELL_KNOWN_URL + FChallenges[Index].Token then
+    begin
       AResponseInfo.ContentType := 'application/octet-stream';
       AResponseInfo.ContentText := FChallenges[Index].Token + '.' + FThumbprint;
       mmHTTP.Lines.Add('Challenge for ' + FChallenges[Index].Domain + ' : ' + FChallenges[Index].Token + '.' + FThumbprint);
+    end;
   end;
-end;
-
 end;
 
 // the certificate is validated, you can save it
@@ -284,9 +289,21 @@ begin
    Memo1.Lines.SaveToFile(Str);
 end;
 
+procedure TForm1.cbDNSChallengesClick(Sender: TObject);
+begin
+  if cbDNSChallenges.Checked then
+    ExecuteACME1.OnDnsChallenge := ExecuteACME1DnsChallenge
+  else
+    ExecuteACME1.OnDnsChallenge := nil;
+end;
+
 procedure TForm1.cbHTTPChallengesClick(Sender: TObject);
 begin
   idHTTPServer1.Active := cbHTTPChallenges.Checked;
+  if cbHTTPChallenges.Checked then
+    ExecuteACME1.OnHttpChallenge := ExecuteACME1HttpChallenge
+  else
+    ExecuteACME1.OnHttpChallenge := nil;
 end;
 
 procedure TForm1.ExecuteACME1Error(Sender: TObject; const Error: string);
@@ -295,17 +312,25 @@ begin
   MessageDlg(Error, mtWarning, [mbOK], 0);
 end;
 
+procedure TForm1.ExecuteACME1DnsChallenge(Sender: TObject; const Domain,
+  Digest: string; var Processed: Boolean);
+begin
+  Processed := TDNSChallenge.Execute(Self, Domain, Digest);
+  btFinalize.Enabled := True;
+end;
+
 procedure TForm1.ExecuteACME1Done(Sender: TObject);
 begin
   case ExecuteACME1.OrderStatus of
-    osNone   : ShowMessage('Request done');
-    osPending: ShowMessage('Call FinalizeDomain when the Challenges are processed');
-    osReady  : ShowMessage('Call FinalizeDomain to finalize the Order');
-    osValid  : ShowMessage('Call FinalizeDomain to get the Certificat');
-    osInvalid: ShowMessage('The challenge failed, call FinalizeDomain to get the error or RegisterDomain to start a new Challenge');
-    osExpired: ShowMessage('The certificat has expired, you should call RegisterDomain to renew it');
-    osRevoked: ShowMessage('The certificat is revoked');
-    osUnknown: ShowMessage('Unknow error, check OrderURL (' + ExecuteACME1.OrderURL + ')');
+    osNone      : ShowMessage('Request done');
+    osPending,
+    osProcessing: ShowMessage('Call FinalizeDomain when the Challenges are processed');
+    osReady     : ShowMessage('Call FinalizeDomain to finalize the Order');
+    osValid     : ShowMessage('Call FinalizeDomain to get the Certificat');
+    osInvalid   : ShowMessage('The challenge failed, call FinalizeDomain to get the error or RegisterDomain to start a new Challenge');
+    osExpired   : ShowMessage('The certificat has expired, you should call RegisterDomain to renew it');
+    osRevoked   : ShowMessage('The certificat is revoked');
+    osUnknown   : ShowMessage('Unknow error, check OrderURL (' + ExecuteACME1.OrderURL + ')');
   end;
 end;
 

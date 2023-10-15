@@ -2,7 +2,7 @@ unit Execute.ACME;
 
 {
 
-  ACME Delphi client for Let's Encrypt (c)2018-2021 Execute SARL <contact@execute.fr>
+  ACME Delphi client for Let's Encrypt (c)2018-2023 Execute SARL <contact@execute.fr>
 
   This component is NOT FREE !
 
@@ -25,20 +25,31 @@ unit Execute.ACME;
 
   Define DomaineName
   Define ContactEmail (optional)
-  Define OnHttpChallenge
+  Define OnHttpChallenge and/or OnDnsChallenge
   Define OnCertificate
 
   call TExecuteACME.RegisterDomain();
 
   -> OnHttpChallenge (this is NOT an HTTPS request)
+
     on this request :
       http://<DomainName>/.well-known/acme-client/<Token>
     you have to reply :
       <Token>.<Thumbprint>
-    this can be done by creating the file on an external webserver or by an idHTTP component
+
+    this can be done by creating the file on an external webserver or by an idHTTPServer component
+
+  -> OnDnsChallenge
+
+    you have to add an entry in the domain DNS:
+      _acme-challenge<.subdomain> IN TXT "<digest>"
+
+    for a wildcard entry "*.mydomain.com" there's no subdomain
+      _acme-challenge IN TXT "<digest>"
 
   -> OnCertificate
-    you have a register certificat in the provided TStrings parameter
+
+    you have a registered certificat in the provided TStrings parameter
 }
 
 {
@@ -73,6 +84,14 @@ unit Execute.ACME;
     - version tested only with Delphi 10.4.2
 }
 
+{
+  version 1.5 (2023-10-15)
+
+    - add DNS Challenge
+    - add Processing status (between pending and valid or invalid)
+    - Execute.JSON is now the UTF8 version
+}
+
 interface
 {$ZEROBASEDSTRINGS OFF}
 
@@ -100,7 +119,7 @@ uses
   System.Net.HttpClient,
 {$ENDIF}
   Execute.RTTI,
-  Execute.JSON;
+  Execute.JSON.UTF8;
 
 type
   TEnvironment = (
@@ -132,18 +151,23 @@ type
 
   TPasswordEvent = function(Sender: TObject; KeyType: TKeyType; var Password: string): Boolean of object;
   THttpChallengeEvent = procedure(Sender: TObject; const Domain, Token, Thumbprint: string; var Processed: Boolean) of object;
+  TDnsChallengeEvent = procedure(Sender: TObject; const Domain, Digest: string; var Processed: Boolean) of object;
   TCertificateEvent = procedure(Sender: TObject; Certificate: TStrings) of object;
   TErrorEvent = procedure(Sender: TObject; const Error: string) of object;
 
   TDomainRegistrationThread = class
   end;
-  
+
   TSubmitThread = class(TThread)
+  public
+    constructor Create(Request: TDomainRegistrationThread);
+    procedure Execute; override;
   end;
 
   TACMEOrderStatus = (
     osNone,
     osPending,
+    osProcessing,
     osReady,
     osValid,
     osInvalid,
@@ -158,6 +182,7 @@ type
     /// Path of a HTTP Challenge
     /// </summary>
     WELL_KNOWN_URL = '/.well-known/acme-challenge/';
+    DNS_PREFIX = '_acme-challenge';
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
@@ -246,6 +271,10 @@ type
     /// fired by the component when a pending (Processed = False) HttpChallenge is found
     /// </summary>
     property OnHttpChallenge: THttpChallengeEvent read FOnHttpChallenge write FOnHttpChallenge;
+    /// <summary>
+    /// fired by the component when a pending (Processed = False) DnsChallenge is found
+    /// </summary>
+    property OnDnsChallenge: TDnsChallengeEvent read FOnDnsChallenge write FOnDnsChallenge;
     /// <summary>
     /// fired when the requested Certificat is available
     /// </summary>
