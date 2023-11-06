@@ -62,7 +62,7 @@ type
     btLoad: TButton;
     Label3: TLabel;
     mmSubjectAltNames: TMemo;
-    mmHTTP: TMemo;
+    mmLog: TMemo;
     btFinalize: TButton;
     Label1: TLabel;
     edDomainName: TEdit;
@@ -231,14 +231,14 @@ procedure TForm1.IdHTTPServer1CommandGet(AContext: TIdContext;
 var
   Index: Integer;
 begin
-  mmHTTP.Lines.Add(ARequestInfo.URI);
+  mmLog.Lines.Add(ARequestInfo.URI);
   for Index := 0 to Length(FChallenges) - 1 do
   begin
     if ARequestInfo.URI = TExecuteACME.WELL_KNOWN_URL + FChallenges[Index].Token then
     begin
       AResponseInfo.ContentType := 'application/octet-stream';
       AResponseInfo.ContentText := FChallenges[Index].Token + '.' + FThumbprint;
-      mmHTTP.Lines.Add('Challenge for ' + FChallenges[Index].Domain + ' : ' + FChallenges[Index].Token + '.' + FThumbprint);
+      mmLog.Lines.Add('Challenge for ' + FChallenges[Index].Domain + ' : ' + FChallenges[Index].Token + '.' + FThumbprint);
     end;
   end;
 end;
@@ -308,7 +308,7 @@ end;
 
 procedure TForm1.ExecuteACME1Error(Sender: TObject; const Error: string);
 begin
-  mmHTTP.Lines.Add(Error);
+  mmLog.Lines.Add(Error);
   MessageDlg(Error, mtWarning, [mbOK], 0);
 end;
 

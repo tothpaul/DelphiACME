@@ -43,43 +43,60 @@ object Form1: TForm1
     Height = 415
     Anchors = [akLeft, akTop, akRight, akBottom]
     Lines.Strings = (
-      'This application let you create a Certificat for an HTTPS server'
+      
+        'This application allows you to create a certificate for an HTTPS' +
+        ' server.'
       ''
       '1) PrivateKeys'
-      '  you need an Account (account.key) and Domain key (domain.key)'
-      '  you can generate them with "openssl genrsa 4096 > filename"'
-      '  or let the application create them with OpenSSL API'
+      
+        ' To create a certificate, you will need an Account Key (account.' +
+        'key) and a Domain Key (domain.key). You can '
+      
+        'generate these keys using the command "openssl genrsa 4096 > fil' +
+        'ename," or you can let the application create '
+      'them using the OpenSSL API.'
       ''
       '2) Domain Names'
       
-        '  the purpose of Let'#39's Encrypt is to create a certificate for a ' +
-        'domain name'
-      '  this application have to be reachabled at this URL:'
-      '  http://<DomainName>/'
-      '  this is required for the "HTTP Challenge" of Let'#39's Encrypt'
-      '  You can use multiple sub-domains in one request like:'
-      '   www.mydomain.com'
-      '   ftp.mydomain.com'
-      '   smtp.mydomain.com'
+        '  The primary purpose of Let'#39's Encrypt is to generate certificat' +
+        'es for domain names. There are two types of '
+      'challenges:'
+      
+        '  - HTTP Challenge: Let'#39's Encrypt attempts to retrieve data from' +
+        ' http://<DomainName>/'
+      
+        '  - DNS Challenge: Let'#39's Encrypt looks for a DNS entry for the D' +
+        'omainName.'
+      '  DNS Challenge also supports wildcard entries.'
+      '  Both challenges support alternate names..'
       ''
       '3) Contact'
-      '  the contact email is optional'
+      
+        '  Providing a contact email is optional, but it allows you to re' +
+        'ceive expiration notifications from Let'#39's Encrypt.'
       ''
       '4) Staging vs Production'
-      '  for testing, use Staging, for production use Production'
-      ''
-      'to create a certificate, click on the Register button'
       
-        'once the HTTP Challenge is peformed, you can Finalize the reques' +
-        't'
-      'to get the Certificat.'
-      ''
-      'you can revoke (Unregister) a certificate loaded in this memo.'
+        '  For testing purposes, use the Staging environment. For product' +
+        'ion, use the Production environment.'
       ''
       
-        'feedbacks are welcome (in english or french) at contact@execute.' +
-        'fr')
-    ScrollBars = ssBoth
+        'To create a certificate, click the '#39'Register'#39' button. Once the c' +
+        'hallenges have been completed, you can finalize the '
+      'request to obtain the certificate.'
+      ''
+      
+        'You can also revoke (unregister) a certificate loaded in the mem' +
+        'o.'
+      ''
+      
+        'Feedback is welcome in both English and French at contact@execut' +
+        'e.fr'
+      ''
+      
+        'If you have any further questions or need additional assistance,' +
+        ' feel free to ask.')
+    ScrollBars = ssVertical
     TabOrder = 9
   end
   object btRegister: TButton
@@ -160,14 +177,12 @@ object Form1: TForm1
     Hint = 'Subject Alternative names (SAN) like ftp.exemple.com'
     TabOrder = 2
   end
-  object mmHTTP: TMemo
+  object mmLog: TMemo
     Left = 8
     Top = 548
     Width = 568
     Height = 116
     Anchors = [akLeft, akRight, akBottom]
-    Lines.Strings = (
-      'mmHTTP')
     ScrollBars = ssBoth
     TabOrder = 10
   end

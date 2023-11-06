@@ -94,6 +94,10 @@ Switch from TidHTTP to System.Net.HTTPClient for TLS 1.3 support.
 
 DNS Challenge added
 
+## version 1.6
+
+minor fix for DNS challenges
+
 ## Which challenge to use ?
 
 The HTTP challenge is easy to implement; just put a file on you website or embed an IdHTTPServer component to reply dynamically.
