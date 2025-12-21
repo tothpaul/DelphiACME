@@ -10,7 +10,7 @@
             <Dependencies>lib\Execute.ACMERuntime.dproj</Dependencies>
         </Projects>
         <Projects Include="src\ACMEDemo.dproj">
-            <Dependencies>lib\Execute.ACMERuntime.dproj</Dependencies>
+            <Dependencies/>
         </Projects>
         <Projects Include="src2\ACMEConsole.dproj">
             <Dependencies/>
@@ -41,13 +41,13 @@
     <Target Name="Execute_ACMEDesign:Make" DependsOnTargets="Execute.ACMERuntime:Make">
         <MSBuild Projects="lib\Execute.ACMEDesign.dproj" Targets="Make"/>
     </Target>
-    <Target Name="ACMEDemo" DependsOnTargets="Execute.ACMERuntime">
+    <Target Name="ACMEDemo">
         <MSBuild Projects="src\ACMEDemo.dproj"/>
     </Target>
-    <Target Name="ACMEDemo:Clean" DependsOnTargets="Execute.ACMERuntime:Clean">
+    <Target Name="ACMEDemo:Clean">
         <MSBuild Projects="src\ACMEDemo.dproj" Targets="Clean"/>
     </Target>
-    <Target Name="ACMEDemo:Make" DependsOnTargets="Execute.ACMERuntime:Make">
+    <Target Name="ACMEDemo:Make">
         <MSBuild Projects="src\ACMEDemo.dproj" Targets="Make"/>
     </Target>
     <Target Name="ACMEConsole">

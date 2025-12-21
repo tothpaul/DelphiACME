@@ -1470,11 +1470,11 @@ begin
   begin
     if Index > 0 then
       Append(',');
-    var Name := Fields[Index].Name;
+    var Name := UTF8String(Fields[Index].Name);
     Append('"');
     Append(Name);
     Append('":');
-    if BuildField(Name) = False then
+    if BuildField(Fields[Index].Name) = False then
     begin
       if Fields[Index].TypeInfo = nil then
         raise EJSONError.Create('No RTTI informations for ' + GetPath);
@@ -1516,7 +1516,7 @@ begin
       Append(',');
     var Name := Field.GetName;
     Append('"');
-    Append(Name);
+    Append(UTF8String(Name));
     Append('":');
     if BuildField(Name) = False then
     begin

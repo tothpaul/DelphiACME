@@ -1,1 +1,3 @@
 TExecuteACME BITMAP Execute.ACME.bmp
+TExecuteACMEOpenSSLCertificate BITMAP Execute.ACME.OpenSSL.bmp
+TExecuteACMEWinCryptCertificate BITMAP Execute.ACME.WinCrypt.bmp

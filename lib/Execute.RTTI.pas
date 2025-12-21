@@ -4,7 +4,7 @@ unit Execute.RTTI;
 
    (c)2015-2023 Execute SARL  <contact@execute.fr>
 
-   http://www.execute.fr
+   https://www.execute.fr
 
 }
 
@@ -41,6 +41,9 @@ type
   Alias = class(TCustomAttribute)
     constructor Create(const AName: string);
     class function IsAlias(Field: PRecordTypeField; const AName: string): Boolean;
+  end;
+
+  Nullable = class(TCustomAttribute)
   end;
 
   TAttributeClass = class of TCustomAttribute;
@@ -94,7 +97,7 @@ type
     etWideString,    // tkWString
     etVariant,       // tkVariant
     etArray,         // tkArray
-    etRecord,        // tkRecord
+    etRecord,        // tkRecord -> etGUID
     etInterface,     // tkInterface
     etInt64,         // tkInt64 -> etUInt64
     etDynArray,      // tkDynArray -> etBytes
@@ -135,7 +138,9 @@ type
     etBytes,
   // tkPointer
     etPAnsiChar,
-    etPChar
+    etPChar,
+  // tkRecord
+    etGUID
   );
 
   TTypeInfoHelper = record helper for TTypeInfo
@@ -169,6 +174,7 @@ type
     function GetClassMethodAddress(const Name: string): Pointer;
     function GetClassPropInfos: TClassPropInfos;
     function GetClassFieldInfos: TClassFieldInfos;
+    function GetClassOwnsFieldInfos: TClassFieldInfos;
     function GetMethodAddress(const Name: string): Pointer;
 
   // Attributes
@@ -210,8 +216,8 @@ type
   end;
 
   RTTI = class
-    class procedure CopyType(TypeInfo: PTypeInfo; V1, V2: Pointer);
-    class procedure Copy<T>(const V1, V2: T);
+    class procedure CopyType(TypeInfo: PTypeInfo; Source, Target: Pointer);
+    class procedure Copy<T>(const Source, Target: T);
     class function EqualsType(TypeInfo: PTypeInfo; V1, V2: Pointer): Boolean;
     class function Equals<T>(const V1, V2: T): Boolean; reintroduce;
     class procedure Dump<T>(const V: T; Lines: TStrings);
@@ -225,14 +231,14 @@ begin
   Result := TypeInfo.Equals(V1, V2);
 end;
 
-class procedure RTTI.Copy<T>(const V1, V2: T);
+class procedure RTTI.Copy<T>(const Source, Target: T);
 begin
-  CopyType(TypeInfo(T), @V1, @V2);
+  CopyType(TypeInfo(T), @Source, @Target);
 end;
 
-class procedure RTTI.CopyType(TypeInfo: PTypeInfo; V1, V2: Pointer);
+class procedure RTTI.CopyType(TypeInfo: PTypeInfo; Source, Target: Pointer);
 begin
-  TypeInfo.Copy(V1, V2);
+  TypeInfo.Copy(Source, Target);
 end;
 
 class procedure RTTI.Dump<T>(const V: T; Lines: TStrings);
@@ -314,7 +320,7 @@ function TVmtFieldEntryHelper.GetName: string;
 begin
   var LAlias := AttrData.GetAttribute(Alias);
   if LAlias = nil then
-    Result := Name
+    Result := string(Name)
   else
     Result := LAlias.StringAt(0);
 end;
@@ -640,7 +646,11 @@ begin
     tkWString: Result := etWideString;
     tkVariant: Result := etVariant;
     tkArray: Result := etArray;
-    tkRecord: Result := etRecord;
+    tkRecord:
+      if @Self = System.TypeInfo(TGUID) then
+        Result := etGUID
+      else
+        Result := etRecord;
     tkInterface: Result := etInterface;
     tkInt64:
       if TypeData.MinInt64Value = 0 then
@@ -715,14 +725,19 @@ function TTypeInfoHelper.GetClassFieldInfos: TClassFieldInfos;
 var
   TypeInfo: PTypeInfo;
 begin
-  Result := nil;
-  MergeClassFieldInfos(Result);
+  Result := GetClassOwnsFieldInfos;
   TypeInfo := @Self;
   while TypeInfo.TypeData.ParentInfo <> nil do
   begin
     TypeInfo := TypeInfo.TypeData.ParentInfo^;
     TypeInfo.MergeClassFieldInfos(Result);
   end;
+end;
+
+function TTypeInfoHelper.GetClassOwnsFieldInfos: TClassFieldInfos;
+begin
+  Result := nil;
+  MergeClassFieldInfos(Result);
 end;
 
 procedure TTypeInfoHelper.MergeClassFieldInfos(var Infos: TClassFieldInfos);
@@ -752,11 +767,11 @@ begin
   SetLength(Infos, Prev + Count);
   for Index := 0 to Count - 1 do
   begin
-    Infos[Prev + Index].Name := Field.GetName;
+    Infos[Prev + Index].Name := string(Field.Name);
     Infos[Prev + Index].Offset := Field.FieldOffset;
     Infos[Prev + Index].TypeInfo := CTab.ClassRef[Field.TypeIndex].ClassInfo;
-    Attr := PAttrData(Field.NameFld.Tail);
-    Inc(Ptr, Attr.Len);
+//    Attr := PAttrData(Field.NameFld.Tail);  !!! NO !
+    Ptr := Field.NameFld.Tail;
   end;
 
   // extended fields (?!)
@@ -1393,7 +1408,8 @@ begin
     E := @PByte(@Self)[Len];
     while PByte(I) < E do
     begin
-      if I.AttrType^ = Attribute.ClassInfo then
+      if I.AttrType^.TypeData.ClassType.InheritsFrom(Attribute) then
+//      if I.AttrType^ = Attribute.ClassInfo then
       begin
         Exit(I);
       end;

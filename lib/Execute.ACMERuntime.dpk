@@ -35,6 +35,13 @@ requires
   IndyCore;
 
 contains
-  Execute.ACME in 'Execute.ACME.pas';
+  Execute.ACME,
+  Execute.WinSSL,
+  Execute.WinCrypt,
+  Execute.ASN1,
+  Execute.RTTI in 'Execute.RTTI.pas',
+  Execute.JSON.UTF8 in 'Execute.JSON.UTF8.pas',
+  Execute.UTF8.Utils in 'Execute.UTF8.Utils.pas',
+  Execute.OpenSSL in 'Execute.OpenSSL.pas';
 
 end.

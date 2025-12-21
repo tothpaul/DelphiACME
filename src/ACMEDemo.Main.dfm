@@ -1,7 +1,7 @@
 object Form1: TForm1
   Left = 0
   Top = 0
-  Caption = 'TExecuteACME Demo (c)2018-2023 Execute SARL'
+  Caption = 'TExecuteACME Demo (c)2018-2025 Execute SARL'
   ClientHeight = 672
   ClientWidth = 588
   Color = clBtnFace
@@ -232,18 +232,27 @@ object Form1: TForm1
   end
   object ExecuteACME1: TExecuteACME
     OnPassword = ExecuteACME1Password
+    RSACertificate = ExecuteACMEWinCryptCertificate1
     OnHttpChallenge = ExecuteACME1HttpChallenge
     OnDnsChallenge = ExecuteACME1DnsChallenge
     OnCertificate = ExecuteACME1Certificate
     OnError = ExecuteACME1Error
     OnDone = ExecuteACME1Done
-    Left = 400
-    Top = 168
+    Left = 176
+    Top = 552
   end
   object IdHTTPServer1: TIdHTTPServer
     Bindings = <>
     OnCommandGet = IdHTTPServer1CommandGet
-    Left = 400
-    Top = 232
+    Left = 504
+    Top = 552
+  end
+  object ExecuteACMEOpenSSLCertificate1: TExecuteACMEOpenSSLCertificate
+    Left = 248
+    Top = 576
+  end
+  object ExecuteACMEWinCryptCertificate1: TExecuteACMEWinCryptCertificate
+    Left = 376
+    Top = 600
   end
 end

@@ -37,11 +37,7 @@ uses
   IdContext, IdCustomHTTPServer, IdBaseComponent, IdComponent,
   IdCustomTCPServer, IdHTTPServer,
 
-// to call idSSLOpenSSLHeaders.Load
-  idSSLOpenSSLHeaders,
-
-// ACME component (dependencies: Indy, Execute.JSON, Execute.RTTI)
-  Execute.ACME;
+  Execute.ACME, Execute.WinSSL, Execute.OpenSSL;
 
 type
   TChallenge = record
@@ -68,6 +64,8 @@ type
     edDomainName: TEdit;
     cbHTTPChallenges: TCheckBox;
     cbDNSChallenges: TCheckBox;
+    ExecuteACMEOpenSSLCertificate1: TExecuteACMEOpenSSLCertificate;
+    ExecuteACMEWinCryptCertificate1: TExecuteACMEWinCryptCertificate;
     function ExecuteACME1Password(Sender: TObject; KeyType: TKeyType;
       var Password: string): Boolean;
     procedure ExecuteACME1HttpChallenge(Sender: TObject; const Domain, Token,
@@ -108,11 +106,15 @@ uses ACMEDemo.DNSChallenge;
 //   one for the registered domain
 procedure TForm1.FormCreate(Sender: TObject);
 begin
-  if not idSSLOpenSSLHeaders.Load then
-    raise Exception.Create('Can not initialize OpenSSL !');
-
-  LoadOrCreateKey(ExecuteACME1.AccountKey, 'account.key');
-  LoadOrCreateKey(ExecuteACME1.DomainKey, 'domain.key');
+//  if not idSSLOpenSSLHeaders.Load then
+//    raise Exception.Create('Can not initialize OpenSSL !');
+  if ExecuteACME1.RSACertificate = nil then
+  begin
+    ShowMessage('Since version 1.7 the new RSACertificate property of TExecuteACME must be set');
+  end else begin
+    LoadOrCreateKey(ExecuteACME1.AccountKey, 'account.key');
+    LoadOrCreateKey(ExecuteACME1.DomainKey, 'domain.key');
+  end;
 end;
 
 // utility function
@@ -133,7 +135,7 @@ begin
     Str := '';
     if not InputQuery('Protect your key with a password', #1'Password for ' + Name,  Str) then
       Exit;
-    TExecuteACME.GeneraRSAKey(Key, Str);
+    ExecuteACME1.RSACertificate.GenerateRSAKey(Key, Str);
     Key.SaveToFile(Name);
   end;
 end;
@@ -324,9 +326,17 @@ begin
   case ExecuteACME1.OrderStatus of
     osNone      : ShowMessage('Request done');
     osPending,
-    osProcessing: ShowMessage('Call FinalizeDomain when the Challenges are processed');
+    osProcessing:
+    begin
+      ShowMessage('Call FinalizeDomain when the Challenges are processed');
+      btFinalize.Enabled := True;
+    end;
     osReady     : ShowMessage('Call FinalizeDomain to finalize the Order');
-    osValid     : ShowMessage('Call FinalizeDomain to get the Certificat');
+    osValid     :
+    begin
+      ShowMessage('Call FinalizeDomain to get the Certificat');
+      btFinalize.Enabled := True;
+    end;
     osInvalid   : ShowMessage('The challenge failed, call FinalizeDomain to get the error or RegisterDomain to start a new Challenge');
     osExpired   : ShowMessage('The certificat has expired, you should call RegisterDomain to renew it');
     osRevoked   : ShowMessage('The certificat is revoked');

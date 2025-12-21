@@ -17,6 +17,11 @@ uses
   System.SysUtils,
   System.Classes,
   Execute.ACME,
+{$IFDEF LINUX}
+  Execute.OpenSSL,
+{$ELSE}
+  Execute.WinSSL,
+{$ENDIF}
   idHTTPServer,
   idContext,
   idCustomHTTPServer;
@@ -57,12 +62,12 @@ begin
   Result := string(str);
 end;
 
-procedure LoadCertificat(Key: TStrings; const FileName: string);
+procedure LoadCertificat(ACME: TExecuteACME; Key: TStrings; const FileName: string);
 begin
   if FileExists(FileName) then
     Key.LoadFromFile(FileName)
   else begin
-    TExecuteACME.GeneraRSAKey(Key, ACME_PASSWORD);
+    ACME.RSACertificate.GenerateRSAKey(Key, ACME_PASSWORD);
     Key.WriteBOM := False; // required under Linux !
     Key.SaveToFile(FileName);
   end;
@@ -77,7 +82,11 @@ begin
   ACME.OnCertificate := OnCertificate;
   ACME.OnError := OnError;
   ACME.OnDone := OnDone;
-
+{$IFDEF LINUX}
+  ACME.RSACertificate := TExecuteACMEOpenSSLCertificate.Create(nil);
+{$ELSE}
+  ACME.RSACertificate := TExecuteACMEWinCryptCertificate.Create(nil);
+{$ENDIF}
   HTTP := TidHTTPServer.Create(nil);
   HTTP.OnCommandGet := OnCommandGet;
 end;
@@ -157,8 +166,8 @@ begin
 
 
   ACME.Environment := TEnvironment.StagingV2;
-  LoadCertificat(ACME.AccountKey, 'account.key');
-  LoadCertificat(ACME.DomainKey, 'domain.key');
+  LoadCertificat(ACME, ACME.AccountKey, 'account.key');
+  LoadCertificat(ACME, ACME.DomainKey, 'domain.key');
 
   Str := ParamStr(2);
   if Str = 'unregister' then

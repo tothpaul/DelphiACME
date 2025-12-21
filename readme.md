@@ -1,5 +1,5 @@
 # ACME (Let's Encrypt protocol) component for Delphi
-(c)2018-2023 by [Execute SARL](http://www.execute.fr)
+(c)2018-2025 by [Execute SARL](http://www.execute.fr)
 
 ## Purpose
 
@@ -97,6 +97,16 @@ DNS Challenge added
 ## version 1.6
 
 minor fix for DNS challenges
+
+## version 1.7
+
+TExecuteACME now requires a certificate handler
+
+TExecuteACMEOpenSSLCertificate uses OpenSSL
+
+TExecuteACMEWinCryptCertificate uses only Windows API
+
+New OnALPNChallenge event (see https://support.streamsec.net/forum/?cmd=viewtopic&section_id=3&topic_id=56)
 
 ## Which challenge to use ?
 

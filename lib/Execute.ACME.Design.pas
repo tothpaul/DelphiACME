@@ -10,12 +10,14 @@ uses
   System.SysUtils,
   System.Classes,
   Vcl.Dialogs,
-  Execute.ACME;
+  Execute.ACME,
+  Execute.OpenSSL,
+  Execute.WinSSL;
 
 type
   TExecuteACMEEditor = class(TComponentEditor)
   private
-    procedure GenerateKey(Key: TStrings; const Name: string);
+    procedure GenerateKey(ACME: TExecuteACME; Key: TStrings; const Name: string);
   public
     function GetVerb(Index: Integer): string; override;
     function GetVerbCount: Integer; override;
@@ -28,14 +30,14 @@ implementation
 
 procedure Register;
 begin
-  RegisterComponents('Execute', [TExecuteACME]);
+  RegisterComponents('Execute', [TExecuteACME, TExecuteACMEOpenSSLCertificate, TExecuteACMEWinCryptCertificate]);
 
   RegisterComponentEditor(TExecuteACME, TExecuteACMEEditor);
 end;
 
 { TExecuteACMEEditor }
 
-procedure TExecuteACMEEditor.GenerateKey(Key: TStrings; const Name: string);
+procedure TExecuteACMEEditor.GenerateKey(ACME: TExecuteACME; Key: TStrings; const Name: string);
 var
   Str: string;
 begin
@@ -43,7 +45,7 @@ begin
   if not InputQuery('Password for the ' + Name, 'Define the Private Key Password', Str) then
     Exit;
   try
-    TExecuteACME.GeneraRSAKey(Key, Str);
+    ACME.RSACertificate.GenerateRSAKey(Key, Str);
     Str := Name + '.key';
     if PromptForFileName(
       Str,
@@ -63,12 +65,12 @@ end;
 
 procedure TExecuteACMEEditor.ExecuteVerb(Index: Integer);
 var
-  LE: TExecuteACME;
+  ACME: TExecuteACME;
 begin
-  LE := GetComponent as TExecuteACME;
+  ACME := GetComponent as TExecuteACME;
   case Index of
-    0: GenerateKey(LE.AccountKey, 'Account');
-    1: GenerateKey(LE.DomainKey, 'Domain');
+    0: GenerateKey(ACME, ACME.AccountKey, 'Account');
+    1: GenerateKey(ACME, ACME.DomainKey, 'Domain');
   end;
 end;
 
@@ -81,8 +83,14 @@ begin
 end;
 
 function TExecuteACMEEditor.GetVerbCount: Integer;
+var
+  ACME: TExecuteACME;
 begin
-  Result := 2;
+  ACME := GetComponent as TExecuteACME;
+  if ACME.RSACertificate = nil then
+    Result := 0
+  else
+    Result := 2;
 end;
 
 end.
